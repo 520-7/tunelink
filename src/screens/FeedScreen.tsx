@@ -15,7 +15,7 @@ const FeedScreen = () => {
       location: 'New York',
       albumCoverUri: 'https://via.placeholder.com/350x250',
       audioUri: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-      description: 'Just discovered this amazing track! 😍',
+      description: 'Just discovered this amazing track!  😍',
       spotifyLink: 'https://open.spotify.com/track/xyz',
       comments: [
         { username: 'Commenter1', text: 'Great track!' },
