@@ -8,6 +8,7 @@ import SignupScreen from './src/screens/SignupScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import OnboardingScreen from './src/screens/Onboarding';
 import FeedScreen from './src/screens/FeedScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
 import { RootStackParamList } from './src/navigation/RootStackParamList';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -37,6 +38,10 @@ const App = () => {
           options={{ headerShown: false }}
         />
         <Stack.Screen name="Feed" component={FeedScreen} options={{ headerShown: false }}/>
+        <Stack.Screen
+          name="Profile"
+          component={ProfileScreen}
+          options={{headerShown: false}}/>
 
       </Stack.Navigator>
     </NavigationContainer>
