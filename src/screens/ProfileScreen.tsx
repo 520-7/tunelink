@@ -84,7 +84,7 @@ const ProfileScreen: React.FC<Props> =  ({navigation}) => {
           <Ionicons name="musical-notes" size={30} color="#A8EB12" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('MakePost')}>
           <Ionicons name="add-circle" size={70} color="#A8EB12" />
         </TouchableOpacity>
 
