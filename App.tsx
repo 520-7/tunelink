@@ -16,9 +16,9 @@ const Stack = createStackNavigator<RootStackParamList>();
 const App = () => {
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: '981133107700-rqi9fug0t7mkov2p2q7ivm6q2esgge0e.apps.googleusercontent.com',
-    });
-  }, []);
+      webClientId: '981133107700-rqi9fug0t7mkov2p2q7ivm6q2esgge0e.apps.googleusercontent.com'
+    })
+  });
 
   return (
     <NavigationContainer>

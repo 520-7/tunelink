@@ -5,6 +5,7 @@ import { View, StyleSheet, Image, TouchableOpacity, Text } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/RootStackParamList';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -16,8 +17,20 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
+  
   const handleLogin = () => {
-    // Add login logic here
+    navigation.navigate('Onboarding');
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      console.log('Google login success:', userInfo);
+      navigation.navigate('Onboarding');
+    } catch {
+      
+    }
   };
 
   return (
@@ -45,9 +58,13 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           style={styles.input}
         />
 
-        <Button mode="contained" onPress={handleLogin} style={styles.loginButton}>
+        {/* <Button mode="contained" onPress={handleLogin} style={styles.loginButton}>
           Login
-        </Button>
+        </Button> */}
+
+        <Button mode="outlined" onPress={handleGoogleSignIn} style={styles.loginButton}>
+        Sign in with Google
+      </Button>
 
         <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
           <Text style={styles.link}>Don't have an account? Sign up</Text>
