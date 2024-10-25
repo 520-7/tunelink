@@ -13,7 +13,8 @@
     "noEmit": true
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "backend/apiService.ts"
   ],
   "exclude": [
     "node_modules"

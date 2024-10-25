@@ -12,72 +12,74 @@ interface Props {
 }
 
 const ProfileScreen: React.FC<Props> = ({ navigation }) => {
-  // Mock user data
   const user = {
-    userAvatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-    username: 'User456',
-    bio: 'UMass 25',
-    followers: 9999999,
-    following: 1,
+    userAvatarUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
+    userName: 'User456',
+    profileDescription: 'UMass 25',
+    followerCount: 9999999,
+    following: ['userId1'],
+    totalLikeCount: 100,
+    genres: ['Pop', 'Rock'],
+    ownedPosts: ['1', '2'],
   };
 
-  // Mock post data
   const posts = [
     {
+      ownerUser: 'userId1',
+      likesCount: 50,
+      timestamp: '2024-10-17T10:00:00Z',
+      albumCoverUrl: 'https://via.placeholder.com/350x250',
+      audioUrl: 'https://example.com/audio/track1.mp3',
+      caption: 'Just discovered this amazing track! 😍',
+      outLinks: {
+        spotify: 'https://spotify.com/track/1',
+        youtube: 'https://youtube.com/watch?v=1',
+      },
       id: '1',
-      albumCoverUri: 'https://via.placeholder.com/350x250',
-      title: 'Just discovered this amazing track! 😍',
       datePosted: '2024-10-17',
     },
     {
+      ownerUser: 'userId1',
+      likesCount: 30,
+      timestamp: '2024-10-16T10:00:00Z',
+      albumCoverUrl: 'https://via.placeholder.com/350x250',
+      audioUrl: 'https://example.com/audio/track2.mp3',
+      caption: 'This song is so chill! 🎧',
+      outLinks: {
+        spotify: '',
+        youtube: '',
+      },
       id: '2',
-      albumCoverUri: 'https://via.placeholder.com/350x250',
-      title: 'This song is so chill! 🎧',
       datePosted: '2024-10-16',
     },
-    // Add more posts as needed...
   ];
-
-  // Function to handle user profile press
-  const handleProfilePress = () => {
-    // Navigate to profile detail screen or perform an action
-    navigation.navigate('ProfileDetail'); // Change this to your actual screen name
-  };
 
   return (
     <View style={styles.container}>
-      {/* Header as a button */}
-      <TouchableOpacity style={styles.header} onPress={handleProfilePress}>
-        <Image source={{ uri: user.userAvatar }} style={styles.avatar} />
-        <Text style={styles.username}>{user.username}</Text>
-      </TouchableOpacity>
-
-      {/* Bio */}
-      <View style={styles.bioSection}>
-        <Text style={styles.bio}>{user.bio}</Text>
+      <View style={styles.header}>
+        <Image source={{ uri: user.userAvatarUrl }} style={styles.avatar} />
+        <Text style={styles.username}>{user.userName}</Text>
       </View>
 
-      {/* Followers/Following Section */}
       <View style={styles.followSection}>
         <View style={styles.followCard}>
-          <Text style={styles.followCount}>{user.followers.toLocaleString()}</Text>
+          <Text style={styles.followCount}>{user.followerCount.toLocaleString()}</Text>
           <Text style={styles.followLabel}>Followers</Text>
         </View>
         <View style={styles.followCard}>
-          <Text style={styles.followCount}>{user.following.toLocaleString()}</Text>
+          <Text style={styles.followCount}>{user.following.length.toLocaleString()}</Text>
           <Text style={styles.followLabel}>Following</Text>
         </View>
       </View>
 
-      {/* User Posts List */}
       <FlatList
         data={posts}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.postContainer}>
-            <Image source={{ uri: item.albumCoverUri }} style={styles.albumCover} />
+            <Image source={{ uri: item.albumCoverUrl }} style={styles.albumCover} />
             <View style={styles.textContainer}>
-              <Text style={styles.postTitle}>{item.title}</Text>
+              <Text style={styles.postTitle}>{item.caption}</Text>
               <Text style={styles.postDate}>{item.datePosted}</Text>
             </View>
           </View>
@@ -86,13 +88,11 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
         contentContainerStyle={styles.postListContent}
       />
 
-      {/* Footer */}
       <View style={styles.footer}>
         <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Feed')}>
           <Ionicons name="musical-notes" size={30} color="#A8EB12" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('Feed')}>
         <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('MakePost')}>
           <Ionicons name="add-circle" size={70} color="#A8EB12" />
         </TouchableOpacity>
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   postListContent: {
-    paddingBottom: 100, // Add some padding at the bottom for the footer
+    paddingBottom: 100,
   },
   postContainer: {
     flexDirection: 'row',
@@ -172,8 +172,8 @@ const styles = StyleSheet.create({
     padding: 15,
     borderBottomColor: '#4D4D4D',
     borderBottomWidth: 1,
-    borderRadius: 10, // Rounded corners
-    backgroundColor: '#1a1a1a', // Background for posts
+    borderRadius: 10,
+    backgroundColor: '#1a1a1a',
     marginHorizontal: 10,
     marginVertical: 5,
   },
