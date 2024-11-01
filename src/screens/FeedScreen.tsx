@@ -3,16 +3,22 @@ import { View, FlatList, StyleSheet, TouchableOpacity, Image, Dimensions } from 
 import PostComponent from '../components/PostComponent'; // Adjust the path to your component
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/RootStackParamList';
 
 const { width, height } = Dimensions.get('window');
 
 type FeedScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Feed'>;
+type FeedScreenRouteProp = RouteProp<RootStackParamList, 'Feed'>;
+
 interface Props {
   navigation: FeedScreenNavigationProp;
+  route: FeedScreenRouteProp
+
 }
 
-const FeedScreen: React.FC<Props> =  ({navigation}) => {
+const FeedScreen: React.FC<Props> =  ({navigation, route}) => {
+  const userId = route.params.userId;
   // Mock post data (you can have an array of mock posts)
   const posts = [
     {
@@ -68,11 +74,11 @@ const FeedScreen: React.FC<Props> =  ({navigation}) => {
           <Ionicons name="musical-notes" size={30} color="#A8EB12" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('MakePost')}>
+        <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('MakePost', { userId })}>
           <Ionicons name="add-circle" size={70} color="#A8EB12" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Profile')}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Profile', { userId })}>
           <Image
             source={{ uri: 'https://randomuser.me/api/portraits/men/30.jpg' }}
             style={styles.profilePic}

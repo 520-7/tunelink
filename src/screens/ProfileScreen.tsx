@@ -1,27 +1,58 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, FlatList, StyleSheet, TouchableOpacity, Image, Dimensions, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/RootStackParamList';
+import { RouteProp } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 
 type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Profile'>;
+type ProfleScreenRouteProp = RouteProp<RootStackParamList, 'Profile'>;
+
 interface Props {
   navigation: ProfileScreenNavigationProp;
+  route: ProfleScreenRouteProp
 }
 
-const ProfileScreen: React.FC<Props> = ({ navigation }) => {
-  // Mock user data
-  const user = {
-    userAvatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-    username: 'User456',
-    bio: 'UMass 25',
-    followers: 9999999,
-    following: 1,
+const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
+  const [user, setUser] = useState({
+    _id: '',
+    userName: '',
+    profileName: '',
+    followerCount: 0,
+    following: [{}],
+    totalLikeCount: 0,
+    profileDescription: '',
+    genres: [] as string[],
+    ownedPosts: [{}],
+    userAvatarUrl: ''
+  });
+
+  const userId = route.params.userId;
+
+  const getUser = async (userId: string) => {
+    try {
+      const response = await fetch(`http://172.31.78.154:3000/api/user/${userId}`, {
+        method: "GET",
+      });
+      const responseData = await response.json();
+
+      if (response.ok) {
+        console.log('successfully retrieved user');
+        setUser(responseData);
+      } else {
+        console.error('Server error:', response);
+      }
+    } catch (error) {
+      console.error('Network request failed:', error);
+    }
   };
 
-  // Mock post data
+  useEffect(() => {
+    getUser(userId); 
+  }, [userId]);
+
   const posts = [
     {
       id: '1',
@@ -35,36 +66,29 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
       title: 'This song is so chill! 🎧',
       datePosted: '2024-10-16',
     },
-    // Add more posts as needed...
   ];
-
-  // Function to handle user profile press
-  const handleProfilePress = () => {
-    // Navigate to profile detail screen or perform an action
-    navigation.navigate('ProfileDetail'); // Change this to your actual screen name
-  };
 
   return (
     <View style={styles.container}>
-      {/* Header as a button */}
-      <TouchableOpacity style={styles.header} onPress={handleProfilePress}>
-        <Image source={{ uri: user.userAvatar }} style={styles.avatar} />
-        <Text style={styles.username}>{user.username}</Text>
-      </TouchableOpacity>
+      {/* Header */}
+      <View style={styles.header}>
+        <Image source={{ uri: user.userAvatarUrl || 'https://randomuser.me/api/portraits/men/32.jpg' }} style={styles.avatar} />
+        <Text style={styles.username}>{user.userName}</Text>
+      </View>
 
       {/* Bio */}
       <View style={styles.bioSection}>
-        <Text style={styles.bio}>{user.bio}</Text>
+        <Text style={styles.bio}>{user.profileDescription}</Text>
       </View>
 
       {/* Followers/Following Section */}
       <View style={styles.followSection}>
         <View style={styles.followCard}>
-          <Text style={styles.followCount}>{user.followers.toLocaleString()}</Text>
+          <Text style={styles.followCount}>{user.followerCount.toLocaleString()}</Text>
           <Text style={styles.followLabel}>Followers</Text>
         </View>
         <View style={styles.followCard}>
-          <Text style={styles.followCount}>{user.following.toLocaleString()}</Text>
+          <Text style={styles.followCount}>{user.following.length.toLocaleString()}</Text>
           <Text style={styles.followLabel}>Following</Text>
         </View>
       </View>
@@ -88,16 +112,15 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
 
       {/* Footer */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Feed')}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Feed', { userId })}>
           <Ionicons name="musical-notes" size={30} color="#A8EB12" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('Feed')}>
-        <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('MakePost')}>
+        <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('MakePost', { userId })}>
           <Ionicons name="add-circle" size={70} color="#A8EB12" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Profile')}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Profile', { userId })}>
           <Image
             source={{ uri: 'https://randomuser.me/api/portraits/men/30.jpg' }}
             style={styles.profilePic}

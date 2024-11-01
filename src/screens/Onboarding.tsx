@@ -5,16 +5,20 @@ import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { Button } from 'react-native-paper';
 import { ScrollView } from 'react-native-gesture-handler';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/RootStackParamList';
 
 type OnboardingScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Onboarding'>;
+type OnboardingScreenRouteProp = RouteProp<RootStackParamList, 'Onboarding'>;
 
 interface Props {
   navigation: OnboardingScreenNavigationProp;
+  route: OnboardingScreenRouteProp
 }
 
-const OnboardingScreen: React.FC<Props> = ({ navigation }) => {
+const OnboardingScreen: React.FC<Props> = ({ navigation, route }) => {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const userId = route.params.userId;
 
   const genres = [
     'Pop', 'Rock', 'R&B', 'Hip-hop', 'EDM', 'Classical', 'Jazz', 'Country', 'Blues', 
@@ -29,9 +33,31 @@ const OnboardingScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const handleContinue = () => {
-    //navigate to the FeedScreen
-    navigation.navigate("Feed")
+  const handleContinue = async () => {
+    try {
+      const updateUserData = {
+        '_id': userId,
+        'genres': selectedGenres
+      };
+
+      const formData = new FormData();
+      formData.append("user", JSON.stringify(updateUserData)); 
+      console.log(formData)
+
+      const response = await fetch(`http://172.31.78.154:3000/api/user/${userId}`, {
+          method: "PUT",
+          body: formData
+      });
+
+      console.log(response);
+      if (response.ok) {
+          navigation.navigate('Feed', {userId} );
+      } else {
+          console.error('Server error:', response.statusText);
+      }
+    } catch (error) {
+        console.error('Network request failed:', error);
+    }
   };
 
   const isSelected = (genre: string) => selectedGenres.includes(genre);

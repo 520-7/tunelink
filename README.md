@@ -39,3 +39,18 @@ npm start
 
 
 
+### Routing Commit Notes: connecting the frontend to the backend
+
+- what was done
+   - used try catch, async await fetch calls to the server
+   - utilized local IP, changed backend to accept local IP rather than just localhost
+   - changed navigation such that when a new screen is entered, the user that signed up's mongoDB _id is passed. Each screen then fetches the data from the database based on _id
+   - only implemented fetch calls in the signup screen, onboarding screen, and profile screen. Feed screen and make post screen has _id available but no fetch calls have been made to retrieve posts and add posts yet.
+      - within the profile, used useState and useEffect to handle repeated updates to a userId. Updates user info each render
+
+- what still needs to be done
+   - implement fetch calls for posts in feed and upload post screens
+   - login screen. Only implemented for sign up screen, make sure _id is routed over from the login screen to other screens
+      - change login var in RootStackParamList.ts to account for this
+   - Right now you have to copy paste your local ip into every single fetch call. Need to implement environment variable to handle this
+   
