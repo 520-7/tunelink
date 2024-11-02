@@ -22,6 +22,10 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     navigation.navigate('Onboarding');
   };
 
+  GoogleSignin.configure({
+    webClientId: '981133107700-rqi9fug0t7mkov2p2q7ivm6q2esgge0e.apps.googleusercontent.com', 
+  });
+
   const handleGoogleSignIn = async () => {
     try {
       await GoogleSignin.hasPlayServices();
