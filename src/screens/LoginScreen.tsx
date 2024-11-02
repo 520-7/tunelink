@@ -14,9 +14,6 @@ interface Props {
 }
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-
   
   const handleLogin = () => {
     navigation.navigate('Onboarding');
