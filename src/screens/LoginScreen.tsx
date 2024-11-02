@@ -26,7 +26,6 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      console.log('Google login success:', userInfo);
       navigation.navigate('Onboarding');
     } catch {
       
