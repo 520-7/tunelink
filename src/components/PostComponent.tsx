@@ -1,117 +1,141 @@
-import React, { useState, useEffect } from 'react';
-import { View, Image, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Audio } from 'expo-av';
+import React, { useState } from 'react';
+import {
+  View,
+  Image,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
+import { Video } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 
-// Define the interface for the post props
+interface Comment {
+  username: string;
+  text: string;
+}
+
 interface PostProps {
   post: {
+    id: string;
     userAvatar: string;
     username: string;
     timestamp: string;
     location: string;
-    albumCoverUri: string;
-    audioUri: string;
+    videoUri: string;
     description: string;
-    spotifyUri: string; // Add Spotify URI
+    spotifyUri?: string;
+    comments: Comment[];
   };
+  isCurrent: boolean; // Indicates if this post is currently visible
 }
 
-const PostComponent: React.FC<PostProps> = ({ post }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
+const SCREEN_HEIGHT = Dimensions.get('window').height;
+const SCREEN_WIDTH = Dimensions.get('window').width;
+
+const PostComponent: React.FC<PostProps> = ({ post, isCurrent }) => {
   const [isMuted, setIsMuted] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  // Effect to unload sound when component unmounts
-  useEffect(() => {
-    return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
-    };
-  }, [sound]);
-
-  // Handle auto-playing music when the component is rendered
-  useEffect(() => {
-    const playAudio = async () => {
-      setLoading(true);
-      try {
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri: post.audioUri },
-          { shouldPlay: true, isMuted: isMuted }
-        );
-        setSound(newSound);
-        setIsPlaying(true);
-      } catch (error) {
-        console.log('Error playing sound', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    playAudio();
-  }, []);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likes, setLikes] = useState(123); // Example like count
 
   // Mute/Unmute functionality
-  const toggleMute = async () => {
-    if (sound) {
-      await sound.setIsMutedAsync(!isMuted);
-      setIsMuted(!isMuted);
-    }
+  const toggleMute = () => {
+    setIsMuted((prev) => !prev);
+  };
+
+  // Like functionality
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    setLikes((prevLikes) => (isLiked ? prevLikes - 1 : prevLikes + 1));
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.userInfo}>
-        <Image source={{ uri: post.userAvatar }} style={styles.profilePic} />
-        <View style={styles.userDetails}>
-          <Text style={styles.username}>{post.username}</Text>
-          <Text style={styles.timeLocation}>{post.timestamp} - {post.location}</Text>
+      {/* Video background */}
+      <Video
+        source={{ uri: post.videoUri }}
+        style={styles.video}
+        resizeMode="cover"
+        shouldPlay={isCurrent}
+        isLooping
+        isMuted={isMuted}
+        onLoad={() => {
+          console.log('Video loaded:', post.id);
+        }}
+        onError={(error) => {
+          console.log('Video error:', error);
+        }}
+      />
+
+      {/* Overlay elements */}
+      <View style={styles.overlay}>
+        {/* Left side: User info and caption */}
+        <View style={styles.leftContainer}>
+          <TouchableOpacity style={styles.userInfo}>
+            <Image source={{ uri: post.userAvatar }} style={styles.profilePic} />
+            <Text style={styles.username}>{post.username}</Text>
+          </TouchableOpacity>
+          <Text style={styles.description}>{post.description}</Text>
+          <View style={styles.musicInfo}>
+            <Ionicons name="musical-notes" size={16} color="#fff" />
+            <Text style={styles.musicText}>Original Sound - {post.username}</Text>
+          </View>
         </View>
-        <Ionicons name="ellipsis-horizontal" size={20} color="#000" />
-      </View>
 
-      <View style={styles.albumCoverContainer}>
-        <Image source={{ uri: post.albumCoverUri }} style={styles.albumCover} />
-      </View>
-
-      <View style={styles.controlsContainer}>
-        {loading ? (
-          <ActivityIndicator size="large" color="#FFFFFF" />
-        ) : (
-          <TouchableOpacity onPress={toggleMute}>
-            <Ionicons name={isMuted ? 'volume-mute' : 'volume-high'} size={30} color="#FFF" />
+        {/* Right side: Action buttons */}
+        <View style={styles.rightContainer}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleLike}>
+            <Ionicons
+              name={isLiked ? 'heart' : 'heart-outline'}
+              size={40}
+              color={isLiked ? 'red' : '#fff'}
+            />
+            <Text style={styles.actionLabel}>{likes}</Text>
           </TouchableOpacity>
-        )}
-        <TouchableOpacity onPress={() => console.log(`Go to Spotify: ${post.spotifyUri}`)}>
-          <Image source={require('../../assets/spotify-logo.png')} style={styles.spotifyIcon} />
-        </TouchableOpacity>
-        <View style={styles.actions}>
-          <TouchableOpacity>
-            <Ionicons name="heart-outline" size={30} color="red" />
+          <TouchableOpacity style={styles.actionButton}>
+            <Ionicons name="chatbubble-outline" size={40} color="#fff" />
+            <Text style={styles.actionLabel}>{post.comments.length}</Text>
           </TouchableOpacity>
-          <TouchableOpacity>
-            <Ionicons name="chatbubble-outline" size={30} color="#FFF" />
+          <TouchableOpacity style={styles.actionButton}>
+            <Ionicons name="share-social-outline" size={40} color="#fff" />
+            <Text style={styles.actionLabel}>Share</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton} onPress={toggleMute}>
+            <Ionicons
+              name={isMuted ? 'volume-mute' : 'volume-high'}
+              size={30}
+              color="#FFF"
+            />
           </TouchableOpacity>
         </View>
       </View>
-
-      <Text style={styles.description}>{post.description}</Text>
-
-      {/* Comments Section */}
-      <TouchableOpacity onPress={() => console.log('View more comments')}>
-        <Text style={styles.viewMoreText}>View more comments</Text>
-      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#1a1a1a',
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 20,
+    height: SCREEN_HEIGHT,
+    width: SCREEN_WIDTH,
+    position: 'relative',
+    backgroundColor: '#000',
+  },
+  video: {
+    width: '100%',
+    height: '100%',
+  },
+  overlay: {
+    position: 'absolute',
+    bottom: 80,
+    left: 10,
+    right: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  leftContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: 20,
   },
   userInfo: {
     flexDirection: 'row',
@@ -122,53 +146,44 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#fff',
     marginRight: 10,
   },
-  userDetails: {
-    flex: 1,
-  },
   username: {
+    color: '#fff',
     fontWeight: 'bold',
-    color: '#FFF',
-  },
-  timeLocation: {
-    color: '#888',
-    fontSize: 12,
-  },
-  albumCoverContainer: {
-    position: 'relative',
-    marginBottom: 10,
-  },
-  albumCover: {
-    width: '100%',
-    height: 250,
-    borderRadius: 8,
-    backgroundColor: '#E0E0E0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  controlsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  spotifyIcon: {
-    width: 30,
-    height: 30,
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: 80,
+    fontSize: 16,
   },
   description: {
-    color: '#FFF',
-    marginTop: 10,
+    color: '#fff',
+    fontSize: 18,
+    marginBottom: 10,
   },
-  viewMoreText: {
-    color: '#A8EB12',
+  musicInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  musicText: {
+    color: '#fff',
+    fontSize: 14,
+    marginLeft: 5,
+  },
+  rightContainer: {
+    width: 60,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingBottom: 20,
+  },
+  actionButton: {
+    marginBottom: 25,
+    alignItems: 'center',
+  },
+  actionLabel: {
+    color: '#fff',
     marginTop: 5,
+    fontSize: 12,
+    textAlign: 'center',
   },
 });
 
