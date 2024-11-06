@@ -5,7 +5,7 @@ import { View, StyleSheet, Image, TouchableOpacity, Text } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/RootStackParamList';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -14,10 +14,6 @@ interface Props {
 }
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
-  
-  const handleLogin = () => {
-    navigation.navigate('Onboarding');
-  };
 
   GoogleSignin.configure({
     webClientId: '981133107700-rqi9fug0t7mkov2p2q7ivm6q2esgge0e.apps.googleusercontent.com', 
@@ -40,23 +36,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       </View>
       
       <View style={styles.formContainer}>
-        <TextInput
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          mode="outlined"
-          placeholder="Enter your email"
-          style={styles.input}
-        />
-        <TextInput
-          label="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          mode="outlined"
-          placeholder="Enter your password"
-          style={styles.input}
-        />
+
 
         {/* <Button mode="contained" onPress={handleLogin} style={styles.loginButton}>
           Login
