@@ -41,10 +41,11 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
   // Function to handle user profile press
   const handleProfilePress = () => {
     // Navigate to profile detail screen or perform an action
-    navigation.navigate('ProfileDetail'); // Change this to your actual screen name
+    // navigation.navigate('ProfileDetail'); // Change this to your actual screen name
+    console.log("profile press")
   };
 
-  return (
+  return(
     <View style={styles.container}>
       {/* Header as a button */}
       <TouchableOpacity style={styles.header} onPress={handleProfilePress}>
@@ -94,6 +95,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
 
         <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('Feed')}>
           <Ionicons name="add-circle" size={70} color="#A8EB12" />
+          </TouchableOpacity>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Profile')}>
