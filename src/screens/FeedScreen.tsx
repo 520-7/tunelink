@@ -1,22 +1,17 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   StyleSheet,
   FlatList,
   TouchableOpacity,
   Dimensions,
-  ActivityIndicator,
 } from "react-native";
 import PostComponent from "../components/PostComponent";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../navigation/RootStackParamList";
 
-const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
-const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
-
 type FeedScreenNavigationProp = StackNavigationProp<RootStackParamList, "Feed">;
-
 interface Props {
   navigation: FeedScreenNavigationProp;
 }
@@ -24,69 +19,55 @@ interface Props {
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 const FeedScreen: React.FC<Props> = ({ navigation }) => {
-  const ownerUser = "671bc105585601fcdbebad64";
+  // Mock post data
+  const posts = [
+    {
+      id: "1",
+      userAvatar: "https://randomuser.me/api/portraits/men/32.jpg",
+      username: "User456",
+      timestamp: "2h ago",
+      location: "New York",
+      videoUri:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      description: "Just discovered this amazing track! 😍",
+      comments: [
+        { username: "Commenter1", text: "Great track!" },
+        { username: "Commenter2", text: "This is my jam!" },
+        { username: "Commenter3", text: "Loved it!" },
+      ],
+    },
+    {
+      id: "2",
+      userAvatar: "https://randomuser.me/api/portraits/women/44.jpg",
+      username: "User789",
+      timestamp: "1h ago",
+      location: "Los Angeles",
+      videoUri:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+      description: "This song is so chill! 🎧",
+      comments: [
+        { username: "Commenter4", text: "Relaxing vibes!" },
+        { username: "Commenter5", text: "Perfect for studying!" },
+        { username: "Commenter6", text: "Smooth!" },
+      ],
+    },
+    // Add more posts as needed
+  ];
 
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // State to track which post is currently visible
   const [currentVisibleIndex, setCurrentVisibleIndex] = useState<number>(0);
 
+  // Ref for FlatList
   const viewabilityConfig = { itemVisiblePercentThreshold: 80 };
-  const onViewRef = useRef(
-    useCallback(({ viewableItems }) => {
-      if (viewableItems.length > 0) {
-        setCurrentVisibleIndex(viewableItems[0].index);
-      }
-    }, [])
-  );
-
-  useEffect(() => {
-    const fetchFeed = async () => {
-      try {
-        const feedResponse = await fetch(
-          `http://${SERVERIP}:${SERVERPORT}/api/feed/get_feed/${ownerUser}`
-        );
-        const feedData = await feedResponse.json();
-
-        const usersResponse = await Promise.all(
-          feedData["feed"].map((post) =>
-            fetch(`http://${SERVERIP}:${SERVERPORT}/api/user/${post.ownerUser}`)
-          )
-        );
-        const usersData = await Promise.all(
-          usersResponse.map((res) => res.json())
-        );
-
-        const postsWithAvatars = feedData["feed"].map((post) => {
-          const user = usersData.find((user) => user._id === post.ownerUser);
-          return {
-            ...post,
-            userAvatarUrl: user
-              ? `http://${SERVERIP}:${SERVERPORT}/api/files/userAvatar/${user.userAvatarUrl}`
-              : null,
-          };
-        });
-
-        setPosts(postsWithAvatars);
-      } catch (error) {
-        console.error("Failed to fetch feed:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFeed();
-  }, []);
-
-  if (loading) {
-    return (
-      <View style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#ffffff" />
-      </View>
-    );
-  }
+  const onViewRef = useRef((viewableItems: any) => {
+    if (viewableItems.viewableItems.length > 0) {
+      setCurrentVisibleIndex(viewableItems.viewableItems[0].index);
+    }
+  });
 
   return (
     <View style={styles.container}>
+      {/* Profile Button at the Top Right */}
       <TouchableOpacity
         style={styles.profileButton}
         onPress={() => navigation.navigate("Profile")}
@@ -96,7 +77,7 @@ const FeedScreen: React.FC<Props> = ({ navigation }) => {
 
       <FlatList
         data={posts}
-        keyExtractor={(item) => item._id}
+        keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => (
           <PostComponent
             post={item}
@@ -124,12 +105,6 @@ const styles = StyleSheet.create({
     top: 50,
     right: 20,
     zIndex: 1,
-  },
-  loaderContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#000000",
   },
 });
 
