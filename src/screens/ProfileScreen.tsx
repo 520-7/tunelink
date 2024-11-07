@@ -95,7 +95,6 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
 
         <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('Feed')}>
           <Ionicons name="add-circle" size={70} color="#A8EB12" />
-          </TouchableOpacity>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Profile')}>

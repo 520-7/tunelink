@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import SplashScreen from './src/screens/SplashScreen';
@@ -9,16 +9,25 @@ import FeedScreen from './src/screens/FeedScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import MakePostScreen from './src/screens/MakePostScreen';
 import { RootStackParamList } from './src/navigation/RootStackParamList';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 
 const Stack = createStackNavigator<RootStackParamList>();
+const auth = getAuth()
 
 const App = () => {
+  const [initializing, setInitializing] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  
   useEffect(() => {
-    GoogleSignin.configure({
-      webClientId: '981133107700-rqi9fug0t7mkov2p2q7ivm6q2esgge0e.apps.googleusercontent.com'
-    })
-  });
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      if (initializing) setInitializing(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  if (initializing) return null;
 
   return (
     <NavigationContainer>
