@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Dimensions } from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity, Dimensions, Image } from 'react-native';
 import PostComponent from '../components/PostComponent';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -69,7 +69,7 @@ const FeedScreen: React.FC<Props> =  ({navigation, route}) => {
       {/* Profile Button at the Top Right */}
       <TouchableOpacity
         style={styles.profileButton}
-        onPress={() => navigation.navigate('Profile', { userId )}
+        onPress={() => navigation.navigate('Profile', { userId })}
       >
         <Ionicons name="person-circle-outline" size={40} color="#fff" />
       </TouchableOpacity>
@@ -109,6 +109,7 @@ const FeedScreen: React.FC<Props> =  ({navigation, route}) => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -163,6 +164,5 @@ const styles = StyleSheet.create({
   },
 });
 
-});
 
 export default FeedScreen;

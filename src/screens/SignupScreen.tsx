@@ -49,6 +49,9 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
         } else {
             console.error('Server error:', response);
         }
+
+
+        
     } catch (error) {
         console.error('Network request failed:', error);
     }

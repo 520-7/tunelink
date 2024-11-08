@@ -119,7 +119,6 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
 
         <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('MakePost', { userId })}>
           <Ionicons name="add-circle" size={70} color="#A8EB12" />
-          </TouchableOpacity>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Profile', { userId })}>
