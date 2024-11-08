@@ -1,12 +1,10 @@
-import React from 'react';
-import { View, FlatList, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
-import PostComponent from '../components/PostComponent'; // Adjust the path to your component
+import React, { useRef, useState } from 'react';
+import { View, StyleSheet, FlatList, TouchableOpacity, Dimensions } from 'react-native';
+import PostComponent from '../components/PostComponent';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/RootStackParamList';
-
-const { width, height } = Dimensions.get('window');
 
 type FeedScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Feed'>;
 type FeedScreenRouteProp = RouteProp<RootStackParamList, 'Feed'>;
@@ -17,19 +15,20 @@ interface Props {
 
 }
 
+
 const FeedScreen: React.FC<Props> =  ({navigation, route}) => {
   const userId = route.params.userId;
-  // Mock post data (you can have an array of mock posts)
+  const SCREEN_HEIGHT = Dimensions.get('window').height;
   const posts = [
     {
+      id: '1',
       userAvatar: 'https://randomuser.me/api/portraits/men/32.jpg',
       username: 'User456',
       timestamp: '2h ago',
       location: 'New York',
-      albumCoverUri: 'https://via.placeholder.com/350x250',
-      audioUri: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-      description: 'Just discovered this amazing track!  😍',
-      spotifyLink: 'https://open.spotify.com/track/xyz',
+      videoUri:
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      description: 'Just discovered this amazing track! 😍',
       comments: [
         { username: 'Commenter1', text: 'Great track!' },
         { username: 'Commenter2', text: 'This is my jam!' },
@@ -37,35 +36,56 @@ const FeedScreen: React.FC<Props> =  ({navigation, route}) => {
       ],
     },
     {
+      id: '2',
       userAvatar: 'https://randomuser.me/api/portraits/women/44.jpg',
       username: 'User789',
       timestamp: '1h ago',
       location: 'Los Angeles',
-      albumCoverUri: 'https://via.placeholder.com/350x250',
-      audioUri: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+      videoUri:
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
       description: 'This song is so chill! 🎧',
-      spotifyLink: 'https://open.spotify.com/track/abc',
       comments: [
         { username: 'Commenter4', text: 'Relaxing vibes!' },
         { username: 'Commenter5', text: 'Perfect for studying!' },
         { username: 'Commenter6', text: 'Smooth!' },
       ],
     },
+    // Add more posts as needed
   ];
+
+  // State to track which post is currently visible
+  const [currentVisibleIndex, setCurrentVisibleIndex] = useState<number>(0);
+
+  // Ref for FlatList
+  const viewabilityConfig = { itemVisiblePercentThreshold: 80 };
+  const onViewRef = useRef((viewableItems: any) => {
+    if (viewableItems.viewableItems.length > 0) {
+      setCurrentVisibleIndex(viewableItems.viewableItems[0].index);
+    }
+  });
 
   return (
     <View style={styles.container}>
-      {/* Header with logo */}
-      <View style={styles.header}>
-        <Image source={require('../../assets/app-logo.png')} style={styles.logo} />
-      </View>
+      {/* Profile Button at the Top Right */}
+      <TouchableOpacity
+        style={styles.profileButton}
+        onPress={() => navigation.navigate('Profile', { userId )}
+      >
+        <Ionicons name="person-circle-outline" size={40} color="#fff" />
+      </TouchableOpacity>
 
-      {/* Feed */}
       <FlatList
         data={posts}
-        keyExtractor={(item, index) => index.toString()} // Use index as key (for mock data)
-        renderItem={({ item }) => <PostComponent post={item} />} // Pass each post to the PostComponent
-        style={styles.feed}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item, index }) => (
+          <PostComponent post={item} isCurrent={index === currentVisibleIndex} />
+        )}
+        pagingEnabled
+        snapToAlignment="start"
+        decelerationRate="fast"
+        showsVerticalScrollIndicator={false}
+        onViewableItemsChanged={onViewRef.current}
+        viewabilityConfig={viewabilityConfig}
       />
 
       {/* Footer */}
@@ -85,6 +105,7 @@ const FeedScreen: React.FC<Props> =  ({navigation, route}) => {
           />
         </TouchableOpacity>
       </View>
+
     </View>
   );
 };
@@ -92,7 +113,13 @@ const FeedScreen: React.FC<Props> =  ({navigation, route}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000', // Black background to match theme
+    backgroundColor: '#000000',
+  },
+  profileButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 1,
   },
   header: {
     height: 100,
@@ -134,6 +161,8 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 20,
   },
+});
+
 });
 
 export default FeedScreen;
