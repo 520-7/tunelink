@@ -16,11 +16,48 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
   const [email, setEmail] = useState<string>('');
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [profilename, setProfileName] = useState<string>('');
 
-  const handleSignup = () => {
-    // Add signup logic here
-    navigation.navigate('Onboarding'); // Redirect to Onboarding page after signup
-  };
+  const handleSignup = async () => {
+    try {
+        const user = {
+            "userName":username,
+            "profileName":profilename,
+            "followerCount":0,
+            "following":[{}],
+            "totalLikeCount":0,
+            "profileDescription":"this is a profile description",
+            "genres":[] as string [],
+            "ownedPosts":[{}]
+        };
+        //const avatarFile = 'test';
+        const formData = new FormData();
+        formData.append("user", JSON.stringify(user)); 
+        //formData.append("userAvatar", JSON.stringify(avatarFile));
+
+        const response = await fetch("http://172.31.78.154:3000/api/upload/uploadUser", {
+            method: "POST",
+            body: formData
+        });
+
+        const responseData = await response.json();
+        const userId = responseData.userId
+        console.log(responseData);
+
+        if (response.ok) {
+            navigation.navigate('Onboarding', {userId} );
+        } else {
+            console.error('Server error:', response);
+        }
+
+
+        
+    } catch (error) {
+        console.error('Network request failed:', error);
+    }
+};
+
+
 
   return (
       <View style={styles.container}>
@@ -49,6 +86,18 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
           theme={{ colors: { text: '#FFFFFF', placeholder: '#FFFFFF' } }} // Set white text and placeholder
             textColor='white'
          />
+
+        <TextInput
+          label="Profle Name"
+          value={profilename}
+          onChangeText={setProfileName}
+          mode="outlined"
+          placeholder="Enter your Profile Name"
+          style={styles.input}
+          theme={{ colors: { text: '#FFFFFF', placeholder: '#FFFFFF' } }} // Set white text and placeholder
+            textColor='white'
+         />
+
         <TextInput
           label="Password"
           value={password}

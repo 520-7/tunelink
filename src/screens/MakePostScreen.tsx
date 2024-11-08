@@ -4,13 +4,20 @@ import { TextInput, Button } from 'react-native-paper';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { RootStackParamList } from '../navigation/RootStackParamList';
+import { RouteProp } from '@react-navigation/native';
+
 
 type MakePostScreenNavigationProp = StackNavigationProp<RootStackParamList, 'MakePost'>;
+type MakePostScreenRouteProp = RouteProp<RootStackParamList, 'MakePost'>;
+
 interface Props {
   navigation: MakePostScreenNavigationProp;
+  route: MakePostScreenRouteProp
 }
 
-const MakePostScreen: React.FC<Props> = ({ navigation }) => {
+const MakePostScreen: React.FC<Props> = ({ navigation, route }) => {
+  const userId = route.params.userId;
+
   const [title, setTitle] = useState<string>('');
   const [caption, setCaption] = useState<string>('');
   const [imageUrl, setImageUrl] = useState<string>('');
@@ -25,7 +32,7 @@ const MakePostScreen: React.FC<Props> = ({ navigation }) => {
     const postDetails = { title, caption, imageUrl };
     console.log(postDetails);
     // Perform further actions like API call or state update here
-    navigation.navigate('Feed');
+    navigation.navigate('Feed', { userId });
   };
 
   // Helper function to render form inputs
@@ -100,7 +107,7 @@ const MakePostScreen: React.FC<Props> = ({ navigation }) => {
           Create Post
         </Button>
 
-        <TouchableOpacity onPress={() => navigation.navigate('Feed')}>
+        <TouchableOpacity onPress={() => navigation.navigate('Feed', { userId })}>
           <Text style={styles.link}>Back Home</Text>
         </TouchableOpacity>
       </View>
