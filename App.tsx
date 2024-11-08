@@ -1,18 +1,54 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import SplashScreen from './src/screens/SplashScreen';
-import SignupScreen from './src/screens/SignupScreen';
-import LoginScreen from './src/screens/LoginScreen';
-import OnboardingScreen from './src/screens/Onboarding';
-import FeedScreen from './src/screens/FeedScreen';
-import ProfileScreen from './src/screens/ProfileScreen';
-import MakePostScreen from './src/screens/MakePostScreen';
-import { RootStackParamList } from './src/navigation/RootStackParamList';
+import React, { useState, useEffect } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import SplashScreen from "./src/screens/SplashScreen";
+import SignupScreen from "./src/screens/SignupScreen";
+import LoginScreen from "./src/screens/LoginScreen";
+import OnboardingScreen from "./src/screens/Onboarding";
+import FeedScreen from "./src/screens/FeedScreen";
+import ProfileScreen from "./src/screens/ProfileScreen";
+import MakePostScreen from "./src/screens/MakePostScreen";
+import { RootStackParamList } from "./src/navigation/RootStackParamList";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
+const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
+const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
+
 const App = () => {
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        console.log("TUNELINK FRONTEND START UP");
+        console.log(
+          `RUN HEALTH CHECK, CONNECTION TO BACKEND AT: ${SERVERIP}:${SERVERPORT}...`
+        );
+        const response = await fetch(
+          `http://${SERVERIP}:${SERVERPORT}/health`
+        ).catch((e) => {
+          console.log("Error during fetch:", e);
+          return null; // Return null to handle undefined response
+        });
+
+        if (response && response.ok) {
+          setIsConnected(true);
+          console.log("SERVER RUNNING: true");
+        } else {
+          console.log("SERVER RUNNING: false");
+          console.log(
+            "CHECK IF .env IS UPDATED, ENSURE YOU HAVE CORRECT CONNECTION DETAILS"
+          );
+        }
+      } catch (error) {
+        console.error("Error connecting to server:", error);
+      }
+    };
+
+    checkConnection();
+  }, []);
+
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Splash">

@@ -1,3 +1,9 @@
+# Devs Please update .env
+
+use `ifconfig` on mac or `ipcofig` if windows to figure out your local ip
+
+it will be under env0, copy the ip address there too .env, it changes as you move around campus, be careful, make sure it's updated.
+
 # 🎵 Tunelink – React Native
 
 Welcome to the **Music Sharing App**! This app, built with React Native, allows users to share, explore, and interact with music-centric posts in a social media format, much like Instagram but dedicated to music lovers. This guide will walk you through the setup and usage of the application.
