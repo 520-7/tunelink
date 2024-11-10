@@ -1,53 +1,58 @@
-import React, { useRef, useState } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Dimensions, Image } from 'react-native';
-import PostComponent from '../components/PostComponent';
-import { Ionicons } from '@expo/vector-icons';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../navigation/RootStackParamList';
+import React, { useRef, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Dimensions,
+  Image,
+} from "react-native";
+import PostComponent from "../components/PostComponent";
+import { Ionicons } from "@expo/vector-icons";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RouteProp } from "@react-navigation/native";
+import { RootStackParamList } from "../navigation/RootStackParamList";
 
-type FeedScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Feed'>;
-type FeedScreenRouteProp = RouteProp<RootStackParamList, 'Feed'>;
+type FeedScreenNavigationProp = StackNavigationProp<RootStackParamList, "Feed">;
+type FeedScreenRouteProp = RouteProp<RootStackParamList, "Feed">;
 
 interface Props {
   navigation: FeedScreenNavigationProp;
-  route: FeedScreenRouteProp
-
+  route: FeedScreenRouteProp;
 }
 
-
-const FeedScreen: React.FC<Props> =  ({navigation, route}) => {
+const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
   const userId = route.params.userId;
-  const SCREEN_HEIGHT = Dimensions.get('window').height;
+  const SCREEN_HEIGHT = Dimensions.get("window").height;
   const posts = [
     {
-      id: '1',
-      userAvatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      username: 'User456',
-      timestamp: '2h ago',
-      location: 'New York',
+      id: "1",
+      userAvatar: "https://randomuser.me/api/portraits/men/32.jpg",
+      username: "User456",
+      timestamp: "2h ago",
+      location: "New York",
       videoUri:
-        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-      description: 'Just discovered this amazing track! 😍',
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      description: "Just discovered this amazing track! 😍",
       comments: [
-        { username: 'Commenter1', text: 'Great track!' },
-        { username: 'Commenter2', text: 'This is my jam!' },
-        { username: 'Commenter3', text: 'Loved it!' },
+        { username: "Commenter1", text: "Great track!" },
+        { username: "Commenter2", text: "This is my jam!" },
+        { username: "Commenter3", text: "Loved it!" },
       ],
     },
     {
-      id: '2',
-      userAvatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-      username: 'User789',
-      timestamp: '1h ago',
-      location: 'Los Angeles',
+      id: "2",
+      userAvatar: "https://randomuser.me/api/portraits/women/44.jpg",
+      username: "User789",
+      timestamp: "1h ago",
+      location: "Los Angeles",
       videoUri:
-        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-      description: 'This song is so chill! 🎧',
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+      description: "This song is so chill! 🎧",
       comments: [
-        { username: 'Commenter4', text: 'Relaxing vibes!' },
-        { username: 'Commenter5', text: 'Perfect for studying!' },
-        { username: 'Commenter6', text: 'Smooth!' },
+        { username: "Commenter4", text: "Relaxing vibes!" },
+        { username: "Commenter5", text: "Perfect for studying!" },
+        { username: "Commenter6", text: "Smooth!" },
       ],
     },
     // Add more posts as needed
@@ -69,7 +74,7 @@ const FeedScreen: React.FC<Props> =  ({navigation, route}) => {
       {/* Profile Button at the Top Right */}
       <TouchableOpacity
         style={styles.profileButton}
-        onPress={() => navigation.navigate('Profile', { userId })}
+        onPress={() => navigation.navigate("Profile", { userId })}
       >
         <Ionicons name="person-circle-outline" size={40} color="#fff" />
       </TouchableOpacity>
@@ -78,7 +83,10 @@ const FeedScreen: React.FC<Props> =  ({navigation, route}) => {
         data={posts}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => (
-          <PostComponent post={item} isCurrent={index === currentVisibleIndex} />
+          <PostComponent
+            post={item}
+            isCurrent={index === currentVisibleIndex}
+          />
         )}
         pagingEnabled
         snapToAlignment="start"
@@ -94,66 +102,70 @@ const FeedScreen: React.FC<Props> =  ({navigation, route}) => {
           <Ionicons name="musical-notes" size={30} color="#A8EB12" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('MakePost', { userId })}>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => navigation.navigate("MakePost", { userId })}
+        >
           <Ionicons name="add-circle" size={70} color="#A8EB12" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Profile', { userId })}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => navigation.navigate("Profile", { userId })}
+        >
           <Image
-            source={{ uri: 'https://randomuser.me/api/portraits/men/30.jpg' }}
+            source={{ uri: "https://randomuser.me/api/portraits/men/30.jpg" }}
             style={styles.profilePic}
           />
         </TouchableOpacity>
       </View>
-
     </View>
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: "#000000",
   },
   profileButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 50,
     right: 20,
     zIndex: 1,
   },
   header: {
     height: 100,
-    backgroundColor: '#000000',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderBottomColor: '#4D4D4D',
+    backgroundColor: "#000000",
+    justifyContent: "center",
+    alignItems: "center",
+    borderBottomColor: "#4D4D4D",
     borderBottomWidth: 1,
     paddingTop: 30,
   },
   logo: {
     width: 120,
     height: 65,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   feed: {
     flex: 1,
   },
   footer: {
     height: 80,
-    backgroundColor: '#000000',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    backgroundColor: "#000000",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
-    borderTopColor: '#4D4D4D',
+    borderTopColor: "#4D4D4D",
     borderTopWidth: 1,
   },
   iconButton: {
     padding: 10,
   },
   addButton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 30,
     transform: [{ translateX: 160 }, { translateY: 20 }],
   },
@@ -163,6 +175,5 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
 });
-
 
 export default FeedScreen;
