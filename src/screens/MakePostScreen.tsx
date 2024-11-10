@@ -31,7 +31,7 @@ const MakePostScreen: React.FC<Props> = ({ navigation }) => {
   const [outLinks, setOutLinks] = useState<any>([]);
   const [audio, setAudio] = useState<any>([]);
 
-  const ownerUser = "671bc105585601fcdbebad64";
+  const ownerUser = "67302712942cf6b99a5d7e0b";
 
   const addOutLink = () => {
     setOutLinks([...outLinks, { key: "", url: "" }]);
