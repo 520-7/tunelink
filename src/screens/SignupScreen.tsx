@@ -1,10 +1,19 @@
-// src/screens/SignupScreen.tsx
 
-import React, { useState } from 'react';
-import { View, StyleSheet, Image, TouchableOpacity, Text } from 'react-native';
-import { TextInput, Button } from 'react-native-paper';
+import React from 'react';
+import { View, StyleSheet, Image, Text } from 'react-native';
+import { Button } from 'react-native-paper';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/RootStackParamList';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
+import { ResponseType } from 'expo-auth-session';
+
+import * as AuthSession from 'expo-auth-session';
+
+
+WebBrowser.maybeCompleteAuthSession();
 
 type SignupScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Signup'>;
 
@@ -12,62 +21,65 @@ interface Props {
   navigation: SignupScreenNavigationProp;
 }
 
-const SignupScreen: React.FC<Props> = ({ navigation }) => {
-  const [email, setEmail] = useState<string>('');
-  const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+const firebaseConfig = {
+  apiKey: "AIzaSyBuM-bpXVe2gYL0NFtpwOJnG1DC15xFWeI",
+  authDomain: "tunelink-fe99c.firebaseapp.com",
+  projectId: "tunelink-fe99c",
+  storageBucket: "tunelink-fe99c.firebasestorage.app",
+  messagingSenderId: "891818434642",
+  appId: "1:891818434642:web:b9de0df8dd30f20d81ff8b",
+  measurementId: "G-WHCH3K5FLC"
+};
 
-  const handleSignup = () => {
-    // Add signup logic here
-    navigation.navigate('Onboarding'); // Redirect to Onboarding page after signup
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const SignupScreen: React.FC<Props> = ({ navigation }) => {
+  // Generate the redirect URI
+  const redirectUrl = AuthSession.makeRedirectUri({
+    scheme: 'tunelink', // Use your defined scheme
+  });
+  console.log('Redirect URL:', redirectUrl); // This should log a proper URL
+
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId: '891818434642-6mnb9kcg6v31c0ckc6ovpct4fcc8t07e.apps.googleusercontent.com',
+    redirectUri: redirectUrl, // Use the generated redirect URL
+  });
+
+  const handleGoogleSignup = async () => {
+    try {
+      const result = await promptAsync();
+      if (result.type === 'success') {
+        const { id_token } = result.params;
+        const credential = GoogleAuthProvider.credential(id_token);
+        const userCredential = await signInWithCredential(auth, credential);
+        console.log('User signed up:', userCredential.user);
+        navigation.navigate('Onboarding');
+      }
+    } catch (error) {
+      console.error('Error during Google sign up:', error);
+    }
   };
 
   return (
-      <View style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.logoContainer}>
         <Image source={require('../../assets/app-logo.png')} style={styles.logo} />
       </View>
       
       <View style={styles.formContainer}>
-        <TextInput
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          mode="outlined"
-          placeholder="Enter your email"
-          style={styles.input}
-          theme={{ colors: { text: '#FFFFFF', placeholder: '#FFFFFF' } }} // Set white text and placeholder
-            textColor='white'
-        />
-        <TextInput
-          label="Username"
-          value={username}
-          onChangeText={setUsername}
-          mode="outlined"
-          placeholder="Enter your username"
-          style={styles.input}
-          theme={{ colors: { text: '#FFFFFF', placeholder: '#FFFFFF' } }} // Set white text and placeholder
-            textColor='white'
-         />
-        <TextInput
-          label="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          mode="outlined"
-          placeholder="Enter your password"
-          style={styles.input}
-          theme={{ colors: { text: '#FFFFFF', placeholder: '#FFFFFF' } }} // Set white text and placeholder
-          textColor='white'
-        />
-
-        <Button mode="contained" onPress={handleSignup} style={styles.signupButton}>
-          Sign Up
+        <Button 
+          mode="contained" 
+          onPress={handleGoogleSignup} 
+          style={styles.googleButton}
+          disabled={!request}
+        >
+          Sign up with Google
         </Button>
 
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.link}>Already have an account? Log in</Text>
-        </TouchableOpacity>
+        <Text style={styles.link} onPress={() => navigation.navigate('Login')}>
+          Already have an account? Log in
+        </Text>
       </View>
     </View>
   );
@@ -76,49 +88,32 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000', // Black background
-    paddingTop: 150, // Move the content down further
+    backgroundColor: '#000000',
+    paddingTop: 150,
   },
   logoContainer: {
-    flex: 0.6, 
+    flex: 0.6,
     justifyContent: 'center',
     alignItems: 'center',
   },
   logo: {
-    width: 200, 
-    height: 200, 
+    width: 200,
+    height: 200,
     resizeMode: 'contain',
   },
   formContainer: {
-    flex: 1.4, 
+    flex: 1.4,
     paddingHorizontal: 16,
-    justifyContent: 'flex-start', 
+    justifyContent: 'flex-start',
   },
-  input: {
-    marginBottom: 16,
-    backgroundColor: '#1a1a1a', // Dark background for inputs
-    color: '#FFFFFF', // White text
-  },
-  signupButton: {
-    backgroundColor: '#4D4D4D', 
+  googleButton: {
+    backgroundColor: '#4285F4',
     marginTop: 20,
   },
   link: {
     color: '#A8EB12',
     textAlign: 'center',
     marginTop: 20,
-    },
-    purpleGlow: {
-    position: 'absolute',
-    width: 200,
-    height: 200,
-    backgroundColor: 'rgba(157, 82, 255, 0.6)', // Purple color with transparency
-    borderRadius: 150, // Circle shape
-    shadowColor: '#A8EB12',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 60, // Glow effect
-    zIndex: -1, // Keep it behind the rest of the content
   },
 });
 

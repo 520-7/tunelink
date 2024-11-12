@@ -9,8 +9,24 @@ import FeedScreen from './src/screens/FeedScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import MakePostScreen from './src/screens/MakePostScreen';
 import { RootStackParamList } from './src/navigation/RootStackParamList';
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
+// import { getReactNativePersistence } from 'firebase/auth/react-native';
 
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBuM-bpXVe2gYL0NFtpwOJnG1DC15xFWeI",
+  authDomain: "tunelink-fe99c.firebaseapp.com",
+  projectId: "tunelink-fe99c",
+  storageBucket: "tunelink-fe99c.firebasestorage.app",
+  messagingSenderId: "891818434642",
+  appId: "1:891818434642:web:b9de0df8dd30f20d81ff8b",
+  measurementId: "G-WHCH3K5FLC"
+};
+
+const app = initializeApp(firebaseConfig);
 const Stack = createStackNavigator<RootStackParamList>();
 const auth = getAuth()
 
