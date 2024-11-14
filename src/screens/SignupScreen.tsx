@@ -34,7 +34,7 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
         totalLikeCount: 0,
         profileDescription: "this is a profile description",
         genres: [] as string[],
-        ownedPosts: [{}],
+        ownedPosts: [],
       };
       //const avatarFile = 'test';
       const formData = new FormData();
