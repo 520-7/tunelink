@@ -6,6 +6,8 @@ import { TextInput, Button } from "react-native-paper";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../navigation/RootStackParamList";
 
+import { login } from "../services/authService";
+
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   "Login"
@@ -19,8 +21,17 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-  const handleLogin = () => {
-    // Add login logic here
+  const handleLogin = async () => {
+    try {
+      const responseData = await login(email, password);
+      if (responseData && responseData.userId) {
+        navigation.navigate("Feed", { userId: responseData.userId });
+      } else {
+        console.error("Login failed:", responseData);
+      }
+    } catch (error) {
+      console.error("Network request failed:", error);
+    }
   };
 
   return (
