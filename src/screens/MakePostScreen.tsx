@@ -34,7 +34,7 @@ const MakePostScreen: React.FC<Props> = ({ navigation, route }) => {
   const [caption, setCaption] = useState<string>("");
   const [image, setImage] = useState<any>(null);
   const [outLinks, setOutLinks] = useState<any>([]);
-  const [audio, setAudio] = useState<any>([]);
+  const [audio, setAudio] = useState<any>(null);
 
   const addOutLink = () => {
     setOutLinks([...outLinks, { key: "", url: "" }]);

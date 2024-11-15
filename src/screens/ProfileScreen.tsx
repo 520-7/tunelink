@@ -12,8 +12,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../navigation/RootStackParamList";
 import { RouteProp } from "@react-navigation/native";
+import { RefreshControl } from "react-native";
 
-const { width } = Dimensions.get("window");
+import { Alert } from "react-native";
+
+const handleError = (error: any, context: string) => {
+  console.error(`${context}:`, error);
+  Alert.alert("Error", `Something went wrong: ${error.message}`);
+};
 
 type ProfileScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -35,33 +41,121 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     userName: "",
     profileName: "",
     followerCount: 0,
-    following: [{}],
+    following: [],
     totalLikeCount: 0,
     profileDescription: "",
     genres: [] as string[],
-    ownedPosts: [{}],
+    ownedPosts: [] as any[],
     userAvatarUrl: "",
   });
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  const refreshData = async () => {
+    setRefreshing(true);
+    await getUser(userId);
+    setRefreshing(false);
+  };
+
   const userId = route.params.userId;
+
+  const getUserAvatar = async (avatarId: string) => {
+    try {
+      const response = await fetch(
+        `http://${SERVERIP}:${SERVERPORT}/api/files/userAvatar/${avatarId}`
+      );
+      if (!response.ok) {
+        throw new Error(`Error fetching avatar: ${response.statusText}`);
+      }
+
+      const blob = await response.blob();
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64data = reader.result as string;
+
+        setUser((prevUser) => ({
+          ...prevUser,
+          userAvatarUrl: `data:image/jpeg;base64,${base64data.split(",")[1]}`,
+        }));
+      };
+      reader.readAsDataURL(blob);
+    } catch (error) {
+      handleError(error, "Fetching avatar");
+      console.error("Failed to fetch user avatar:", error);
+    }
+  };
+
+  const getPosts = async (ownedPosts: string[]) => {
+    try {
+      const fetchedPosts = await Promise.all(
+        ownedPosts.map(async (postId) => {
+          const response = await fetch(
+            `http://${SERVERIP}:${SERVERPORT}/api/post/${postId}`
+          );
+
+          if (!response.ok) {
+            throw new Error(`Error fetching post: ${response.statusText}`);
+          }
+
+          const post = await response.json();
+
+          if (post.albumCoverUrl) {
+            const albumCoverResponse = await fetch(
+              `http://${SERVERIP}:${SERVERPORT}/api/files/albumCover/${post.albumCoverUrl}`
+            );
+
+            if (!albumCoverResponse.ok) {
+              throw new Error(
+                `Error fetching album cover: ${albumCoverResponse.statusText}`
+              );
+            }
+
+            const blob = await albumCoverResponse.blob();
+
+            const reader = new FileReader();
+            const base64Url = await new Promise<string>((resolve, reject) => {
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            });
+
+            post.albumCoverUrl = `data:image/jpeg;base64,${
+              base64Url.split(",")[1]
+            }`;
+          }
+
+          return post;
+        })
+      );
+
+      setUser((prevUser) => ({
+        ...prevUser,
+        ownedPosts: fetchedPosts,
+      }));
+    } catch (error) {
+      handleError(error, "Fetching Posts");
+      console.error("Failed to fetch posts:", error);
+    }
+  };
 
   const getUser = async (userId: string) => {
     try {
       const response = await fetch(
-        `http://${SERVERIP}:${SERVERPORT}/api/user/${userId}`,
-        {
-          method: "GET",
-        }
+        `http://${SERVERIP}:${SERVERPORT}/api/user/${userId}`
       );
       const responseData = await response.json();
 
       if (response.ok) {
-        console.log("successfully retrieved user");
+        console.log("Successfully retrieved user");
         setUser(responseData);
+        getUserAvatar(responseData.userAvatarUrl);
+        getPosts(responseData.ownedPosts);
       } else {
         console.error("Server error:", response);
       }
     } catch (error) {
+      handleError(error, "Fetching user");
       console.error("Network request failed:", error);
     }
   };
@@ -70,34 +164,19 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     getUser(userId);
   }, [userId]);
 
-  const posts = [
-    {
-      id: "1",
-      albumCoverUri: "https://via.placeholder.com/350x250",
-      title: "Just discovered this amazing track! 😍",
-      datePosted: "2024-10-17",
-    },
-    {
-      id: "2",
-      albumCoverUri: "https://via.placeholder.com/350x250",
-      title: "This song is so chill! 🎧",
-      datePosted: "2024-10-16",
-    },
-  ];
-
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Image
           source={{
-            uri:
-              user.userAvatarUrl ||
-              "https://randomuser.me/api/portraits/men/32.jpg",
+            uri: user.userAvatarUrl,
           }}
           style={styles.avatar}
         />
-        <Text style={styles.username}>{user.userName}</Text>
+        <Text style={styles.username}>
+          {user.userName} | {user.profileName}
+        </Text>
       </View>
 
       {/* Bio */}
@@ -123,22 +202,25 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
 
       {/* User Posts List */}
       <FlatList
-        data={posts}
-        keyExtractor={(item) => item.id}
+        data={user.ownedPosts}
+        keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <View style={styles.postContainer}>
             <Image
-              source={{ uri: item.albumCoverUri }}
+              source={{ uri: item.albumCoverUrl }}
               style={styles.albumCover}
             />
             <View style={styles.textContainer}>
-              <Text style={styles.postTitle}>{item.title}</Text>
-              <Text style={styles.postDate}>{item.datePosted}</Text>
+              <Text style={styles.postTitle}>{item.caption}</Text>
+              <Text style={styles.postDate}>{item.timestamp}</Text>
             </View>
           </View>
         )}
         style={styles.postList}
         contentContainerStyle={styles.postListContent}
+        // refreshControl={
+        //   <RefreshControl refreshing={refreshing} onRefresh={refreshData} />
+        // }
       />
 
       {/* Footer */}

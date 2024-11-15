@@ -84,7 +84,6 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.container}>
-
         <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
           {image ? (
             <Image source={{ uri: image.uri }} style={styles.image} />
@@ -140,7 +139,12 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
             style={styles.input}
             theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }}
           />
-          <Button mode="contained" onPress={handleSignup} style={styles.signupButton} labelStyle={styles.signupButtonText}>
+          <Button
+            mode="contained"
+            onPress={handleSignup}
+            style={styles.signupButton}
+            labelStyle={styles.signupButtonText}
+          >
             Sign Up
           </Button>
           <TouchableOpacity onPress={() => navigation.navigate("Login")}>
@@ -157,6 +161,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: "#000000",
     paddingBottom: 50,
+    paddingTop: 50,
   },
   logoContainer: {
     flex: 0.6,
