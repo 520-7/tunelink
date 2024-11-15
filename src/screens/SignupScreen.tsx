@@ -166,6 +166,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: "#000000",
     paddingBottom: 50,
+    paddingTop: 50,
   },
   logoContainer: {
     flex: 0.6,
