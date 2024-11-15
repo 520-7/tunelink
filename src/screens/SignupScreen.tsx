@@ -1,5 +1,4 @@
 // src/screens/SignupScreen.tsx
-
 import React, { useState } from "react";
 import {
   View,
@@ -38,9 +37,9 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 3],
+      aspect: [1, 1],
       quality: 1,
     });
 
@@ -85,21 +84,16 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.container}>
-        <View style={styles.logoContainer}>
-          <Image
-            source={require("../../assets/app-logo.png")}
-            style={styles.logo}
-          />
-        </View>
+
+        <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
+          {image ? (
+            <Image source={{ uri: image.uri }} style={styles.image} />
+          ) : (
+            <Text style={styles.imagePlaceholder}>Select Profile Image</Text>
+          )}
+        </TouchableOpacity>
+
         <View style={styles.formContainer}>
-          <Button
-            onPress={pickImage}
-            style={styles.signupButton}
-            labelStyle={styles.signupButton}
-          >
-            Pick Image
-          </Button>
-          {image && <Image source={{ uri: image.uri }} style={styles.image} />}
           <TextInput
             label="Email"
             value={email}
@@ -107,8 +101,7 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
             mode="outlined"
             placeholder="Enter your email"
             style={styles.input}
-            theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }} // Set white text and placeholder
-            textColor="white"
+            theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }}
           />
           <TextInput
             label="Username"
@@ -117,32 +110,26 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
             mode="outlined"
             placeholder="Enter your username"
             style={styles.input}
-            theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }} // Set white text and placeholder
-            textColor="white"
+            theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }}
           />
-
           <TextInput
-            label="Profle Name"
+            label="Profile Name"
             value={profilename}
             onChangeText={setProfileName}
             mode="outlined"
             placeholder="Enter your Profile Name"
             style={styles.input}
-            theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }} // Set white text and placeholder
-            textColor="white"
+            theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }}
           />
-
           <TextInput
-            label="Profle Description"
+            label="Profile Description"
             value={profileDescription}
             onChangeText={setProfileDescription}
             mode="outlined"
             placeholder="Enter your Profile Description"
             style={styles.input}
-            theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }} // Set white text and placeholder
-            textColor="white"
+            theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }}
           />
-
           <TextInput
             label="Password"
             value={password}
@@ -151,18 +138,11 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
             mode="outlined"
             placeholder="Enter your password"
             style={styles.input}
-            theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }} // Set white text and placeholder
-            textColor="white"
+            theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }}
           />
-
-          <Button
-            mode="contained"
-            onPress={handleSignup}
-            style={styles.signupButton}
-          >
+          <Button mode="contained" onPress={handleSignup} style={styles.signupButton} labelStyle={styles.signupButtonText}>
             Sign Up
           </Button>
-
           <TouchableOpacity onPress={() => navigation.navigate("Login")}>
             <Text style={styles.link}>Already have an account? Log in</Text>
           </TouchableOpacity>
@@ -175,8 +155,7 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: "#000000", // Black background
-    // paddingTop: 150, // Move the content down further
+    backgroundColor: "#000000",
     paddingBottom: 50,
   },
   logoContainer: {
@@ -184,17 +163,32 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  image: {
-    width: 200,
-    height: 200,
-    marginVertical: 16,
-    borderRadius: 10,
-    resizeMode: "contain",
-  },
   logo: {
     width: 200,
     height: 200,
     resizeMode: "contain",
+  },
+  imageContainer: {
+    alignSelf: "center",
+    marginVertical: 20,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    overflow: "hidden",
+    borderWidth: 2,
+    borderColor: "#A8EB12",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 60,
+  },
+  imagePlaceholder: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    textAlign: "center",
   },
   formContainer: {
     flex: 1.4,
@@ -203,29 +197,21 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: 16,
-    backgroundColor: "#1a1a1a", // Dark background for inputs
-    color: "#FFFFFF", // White text
+    backgroundColor: "#1a1a1a",
+    color: "#FFFFFF",
   },
   signupButton: {
     backgroundColor: "#4D4D4D",
-    marginTop: 20,
+    marginTop: 10,
+    paddingVertical: 10,
+  },
+  signupButtonText: {
+    color: "#FFFFFF",
   },
   link: {
     color: "#A8EB12",
     textAlign: "center",
     marginTop: 20,
-  },
-  purpleGlow: {
-    position: "absolute",
-    width: 200,
-    height: 200,
-    backgroundColor: "rgba(157, 82, 255, 0.6)", // Purple color with transparency
-    borderRadius: 150, // Circle shape
-    shadowColor: "#A8EB12",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 60, // Glow effect
-    zIndex: -1, // Keep it behind the rest of the content
   },
 });
 

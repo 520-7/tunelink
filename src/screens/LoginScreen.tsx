@@ -22,6 +22,13 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [password, setPassword] = useState<string>("");
 
   const handleLogin = async () => {
+
+    // For testing purposes remove later
+    if (email === "test" && password === "test") {
+      console.log("Logged in with test credentials");
+      navigation.navigate("Feed", { userId: "testUserId" });
+      return;
+    }
     try {
       const responseData = await login(email, password);
       if (responseData && responseData.userId) {
