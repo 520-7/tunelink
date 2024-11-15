@@ -22,7 +22,6 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [password, setPassword] = useState<string>("");
 
   const handleLogin = async () => {
-
     // For testing purposes remove later
     if (email === "test" && password === "test") {
       console.log("Logged in with test credentials");
@@ -53,6 +52,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       <View style={styles.formContainer}>
         <TextInput
           label="Email"
+          textColor="#FFFFFF"
           value={email}
           onChangeText={setEmail}
           mode="outlined"
@@ -61,6 +61,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         />
         <TextInput
           label="Password"
+          textColor="#FFFFFF"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
