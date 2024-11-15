@@ -95,6 +95,7 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.formContainer}>
           <TextInput
             label="Email"
+            textColor="#FFFFFF"
             value={email}
             onChangeText={setEmail}
             mode="outlined"
@@ -104,6 +105,7 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
           />
           <TextInput
             label="Username"
+            textColor="#FFFFFF"
             value={username}
             onChangeText={setUsername}
             mode="outlined"
@@ -113,6 +115,7 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
           />
           <TextInput
             label="Profile Name"
+            textColor="#FFFFFF"
             value={profilename}
             onChangeText={setProfileName}
             mode="outlined"
@@ -122,6 +125,7 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
           />
           <TextInput
             label="Profile Description"
+            textColor="#FFFFFF"
             value={profileDescription}
             onChangeText={setProfileDescription}
             mode="outlined"
@@ -131,6 +135,7 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
           />
           <TextInput
             label="Password"
+            textColor="#FFFFFF"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
