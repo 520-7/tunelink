@@ -84,7 +84,6 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.container}>
-
         <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
           {image ? (
             <Image source={{ uri: image.uri }} style={styles.image} />
@@ -96,6 +95,7 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.formContainer}>
           <TextInput
             label="Email"
+            textColor="#FFFFFF"
             value={email}
             onChangeText={setEmail}
             mode="outlined"
@@ -105,6 +105,7 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
           />
           <TextInput
             label="Username"
+            textColor="#FFFFFF"
             value={username}
             onChangeText={setUsername}
             mode="outlined"
@@ -114,6 +115,7 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
           />
           <TextInput
             label="Profile Name"
+            textColor="#FFFFFF"
             value={profilename}
             onChangeText={setProfileName}
             mode="outlined"
@@ -123,6 +125,7 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
           />
           <TextInput
             label="Profile Description"
+            textColor="#FFFFFF"
             value={profileDescription}
             onChangeText={setProfileDescription}
             mode="outlined"
@@ -132,6 +135,7 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
           />
           <TextInput
             label="Password"
+            textColor="#FFFFFF"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -140,7 +144,12 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
             style={styles.input}
             theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }}
           />
-          <Button mode="contained" onPress={handleSignup} style={styles.signupButton} labelStyle={styles.signupButtonText}>
+          <Button
+            mode="contained"
+            onPress={handleSignup}
+            style={styles.signupButton}
+            labelStyle={styles.signupButtonText}
+          >
             Sign Up
           </Button>
           <TouchableOpacity onPress={() => navigation.navigate("Login")}>

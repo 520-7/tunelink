@@ -195,6 +195,9 @@ import { RouteProp } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 
+const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
+const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
+
 type MakePostScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   "MakePost"
@@ -212,11 +215,11 @@ const MakePostScreen: React.FC<Props> = ({ navigation, route }) => {
   const [caption, setCaption] = useState<string>("");
   const [image, setImage] = useState<any>(null);
   const [audio, setAudio] = useState<any>(null);
-  const [links, setLinks] = useState<{ source: string; url: string }[]>([]);
+  const [links, setLinks] = useState<any>([]);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "images",
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
@@ -232,8 +235,8 @@ const MakePostScreen: React.FC<Props> = ({ navigation, route }) => {
       type: "audio/*",
     });
 
-    if (result.type !== "cancel") {
-      setAudio(result);
+    if (!result.canceled) {
+      setAudio(result.assets[0]);
     }
   };
 
@@ -253,8 +256,60 @@ const MakePostScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const uploadPost = async () => {
-    console.log("Uploading Post", caption, image, audio, links);
-    navigation.navigate("Feed", { userId });
+    console.log("Uploading Post");
+    console.log(SERVERIP);
+    console.log(SERVERPORT);
+    console.log(caption);
+    console.log(image);
+    console.log(audio);
+    console.log(links);
+    try {
+      const formData = new FormData();
+      formData.append("ownerUser", userId);
+      formData.append("likesCount", "0");
+      formData.append("caption", caption);
+      formData.append("outLinks", JSON.stringify(links));
+
+      if (audio) {
+        const uri = audio.uri;
+        let type = uri.substring(uri.lastIndexOf(".") + 1);
+        formData.append("audio", {
+          uri,
+          name: "media",
+          type: `image/${type}`,
+        } as any);
+      }
+
+      if (image) {
+        const uri = image.uri;
+        let type = uri.substring(uri.lastIndexOf(".") + 1);
+        formData.append("albumCover", {
+          uri,
+          name: "media",
+          type: `image/${type}`,
+        } as any);
+      }
+
+      const response = await fetch(
+        `http://${SERVERIP}:${SERVERPORT}/api/upload/uploadPost`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const responseData = await response.json();
+      console.log(responseData);
+
+      setImage(null);
+      setAudio(null);
+      setCaption("");
+      setLinks([]);
+      navigation.navigate("Feed", { userId });
+    } catch (error) {
+      console.error("Error uploading post:", error);
+      navigation.navigate("Feed", { userId });
+    }
   };
 
   return (
@@ -287,6 +342,7 @@ const MakePostScreen: React.FC<Props> = ({ navigation, route }) => {
       {/* Caption Input */}
       <TextInput
         style={styles.input}
+        textColor="#FFFFFF"
         placeholder="Write a caption..."
         value={caption}
         onChangeText={setCaption}
@@ -300,6 +356,7 @@ const MakePostScreen: React.FC<Props> = ({ navigation, route }) => {
         <View key={index} style={styles.linkContainer}>
           <TextInput
             style={styles.linkInput}
+            textColor="#FFFFFF"
             placeholder="Source (e.g., YouTube)"
             value={link.source}
             onChangeText={(text) => updateLink(index, "source", text)}
@@ -308,6 +365,7 @@ const MakePostScreen: React.FC<Props> = ({ navigation, route }) => {
           />
           <TextInput
             style={styles.linkInput}
+            textColor="#FFFFFF"
             placeholder="URL (e.g., https://example.com)"
             value={link.url}
             onChangeText={(text) => updateLink(index, "url", text)}
