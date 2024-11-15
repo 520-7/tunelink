@@ -25,14 +25,14 @@ type ProfileScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   "Profile"
 >;
-type ProfleScreenRouteProp = RouteProp<RootStackParamList, "Profile">;
+type ProfileScreenRouteProp = RouteProp<RootStackParamList, "Profile">;
 
 const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
 const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
 
 interface Props {
   navigation: ProfileScreenNavigationProp;
-  route: ProfleScreenRouteProp;
+  route: ProfileScreenRouteProp;
 }
 
 const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
@@ -203,9 +203,14 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
       {/* User Posts List */}
       <FlatList
         data={user.ownedPosts}
-        keyExtractor={(item) => item._id}
+        keyExtractor={(item, index) => item._id || String(index)}
         renderItem={({ item }) => (
-          <View style={styles.postContainer}>
+          <TouchableOpacity
+            style={styles.postContainer}
+            onPress={() =>
+              navigation.navigate("SinglePostScreen", { postId: item._id })
+            }
+          >
             <Image
               source={{ uri: item.albumCoverUrl }}
               style={styles.albumCover}
@@ -214,13 +219,10 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
               <Text style={styles.postTitle}>{item.caption}</Text>
               <Text style={styles.postDate}>{item.timestamp}</Text>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
         style={styles.postList}
         contentContainerStyle={styles.postListContent}
-        // refreshControl={
-        //   <RefreshControl refreshing={refreshing} onRefresh={refreshData} />
-        // }
       />
 
       {/* Footer */}
