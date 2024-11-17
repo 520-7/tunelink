@@ -30,6 +30,7 @@ interface Props {
 
 const SinglePostScreen: React.FC<Props> = ({ navigation, route }) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [isLiked, setIsLiked] = useState(false);
   const [post, setPost] = useState({
     _id: "",
     ownerUser: "",
@@ -58,6 +59,57 @@ const SinglePostScreen: React.FC<Props> = ({ navigation, route }) => {
 
     return unsubscribe;
   }, [navigation]);
+
+  const addLike = async () => {
+    setIsLiked(!isLiked);
+    let updateVal = 0;
+    if (!isLiked) {
+      updateVal = post.likesCount + 1;
+    } else {
+      updateVal = post.likesCount - 1;
+    }
+
+    setPost({
+      ...post,
+      likesCount: updateVal,
+    });
+
+    await fetch(
+      `http://${SERVERIP}:${SERVERPORT}/api/post/${route.params?.postId}`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ likesCount: updateVal }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    ).catch((e) => console.error("Could not update on server: ", e));
+
+    const response = await fetch(
+      `http://${SERVERIP}:${SERVERPORT}/api/user/${post.ownerUser}`
+    );
+
+    if (response.ok) {
+      const user = await response.json();
+      let val = user.totalLikeCount;
+      if (!isLiked) {
+        val += 1;
+      } else {
+        val -= 1;
+      }
+
+      await fetch(
+        `http://${SERVERIP}:${SERVERPORT}/api/user/${post.ownerUser}`,
+        {
+          method: "PUT",
+          body: JSON.stringify({ totalLikeCount: val }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      ).catch((e) => console.error("Could not update on server: ", e));
+    }
+  };
 
   const getPost = async (postId: string) => {
     setIsLoading(true);
@@ -135,6 +187,15 @@ const SinglePostScreen: React.FC<Props> = ({ navigation, route }) => {
             </View>
           )}
 
+          {/* Like Button */}
+          <TouchableOpacity style={styles.likeButton} onPress={addLike}>
+            <Ionicons
+              name={isLiked ? "heart" : "heart-outline"}
+              size={24}
+              color={isLiked ? "red" : "grey"}
+            />
+          </TouchableOpacity>
+
           {/* Post Details */}
           <View style={styles.postDetails}>
             <Text style={styles.caption}>{post.caption}</Text>
@@ -204,6 +265,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 50,
+  },
+  likeButton: {
+    padding: 10,
+    backgroundColor: "#1a1a1a",
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 10,
+  },
+  likeButtonText: {
+    color: "white",
+    fontSize: 16,
   },
   albumCover: {
     width: Dimensions.get("window").width * 0.9,

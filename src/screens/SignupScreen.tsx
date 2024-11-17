@@ -35,6 +35,8 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
   const [profileDescription, setProfileDescription] = useState<string>("");
   const [image, setImage] = useState<any>(null);
 
+  const [errorMessage, setErrorMessage] = useState<string>("");
+
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
@@ -69,14 +71,16 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
       }
 
       const responseData = await signup(formData);
-
       if (responseData && responseData.userId) {
         console.log(responseData);
         navigation.navigate("Onboarding", { userId: responseData.userId });
       } else {
-        console.error("Server error:", responseData.message);
+        setErrorMessage("Failed to sign up. Please try again later.");
       }
     } catch (error) {
+      setErrorMessage(
+        "Network request failed. Please enter all fields and try again."
+      );
       console.error("Network request failed:", error);
     }
   };
@@ -84,6 +88,9 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.container}>
+        {errorMessage ? (
+          <Text style={styles.errorMessage}>{errorMessage}</Text>
+        ) : null}
         <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
           {image ? (
             <Image source={{ uri: image.uri }} style={styles.image} />
@@ -177,6 +184,11 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     resizeMode: "contain",
+  },
+  errorMessage: {
+    color: "red",
+    textAlign: "center",
+    marginTop: 10,
   },
   imageContainer: {
     alignSelf: "center",
