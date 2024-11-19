@@ -12,7 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../navigation/RootStackParamList";
 import { RouteProp } from "@react-navigation/native";
-import { RefreshControl } from "react-native";
+import { ActivityIndicator } from "react-native";
 
 import { Alert } from "react-native";
 
@@ -25,14 +25,14 @@ type ProfileScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   "Profile"
 >;
-type ProfleScreenRouteProp = RouteProp<RootStackParamList, "Profile">;
+type ProfileScreenRouteProp = RouteProp<RootStackParamList, "Profile">;
 
 const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
 const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
 
 interface Props {
   navigation: ProfileScreenNavigationProp;
-  route: ProfleScreenRouteProp;
+  route: ProfileScreenRouteProp;
 }
 
 const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
@@ -50,6 +50,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
   });
 
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const refreshData = async () => {
     setRefreshing(true);
@@ -140,6 +141,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const getUser = async (userId: string) => {
+    setLoading(true);
     try {
       const response = await fetch(
         `http://${SERVERIP}:${SERVERPORT}/api/user/${userId}`
@@ -154,15 +156,25 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
       } else {
         console.error("Server error:", response);
       }
+      setLoading(false);
     } catch (error) {
       handleError(error, "Fetching user");
       console.error("Network request failed:", error);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     getUser(userId);
   }, [userId]);
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#A8EB12" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -203,9 +215,14 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
       {/* User Posts List */}
       <FlatList
         data={user.ownedPosts}
-        keyExtractor={(item) => item._id}
+        keyExtractor={(item, index) => item._id || String(index)}
         renderItem={({ item }) => (
-          <View style={styles.postContainer}>
+          <TouchableOpacity
+            style={styles.postContainer}
+            onPress={() =>
+              navigation.navigate("SinglePostScreen", { postId: item._id })
+            }
+          >
             <Image
               source={{ uri: item.albumCoverUrl }}
               style={styles.albumCover}
@@ -214,13 +231,10 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
               <Text style={styles.postTitle}>{item.caption}</Text>
               <Text style={styles.postDate}>{item.timestamp}</Text>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
         style={styles.postList}
         contentContainerStyle={styles.postListContent}
-        // refreshControl={
-        //   <RefreshControl refreshing={refreshing} onRefresh={refreshData} />
-        // }
       />
 
       {/* Footer */}
@@ -295,6 +309,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
     marginHorizontal: 5,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
   },
   followCount: {
     color: "#A8EB12",

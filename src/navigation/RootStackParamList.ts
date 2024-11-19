@@ -15,6 +15,8 @@ export type RootStackParamList = {
       };
     MakePost: { 
         userId: string;
-      };};
-
-
+      };
+    SinglePostScreen: {
+      postId: string;
+    };
+};

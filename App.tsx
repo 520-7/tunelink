@@ -8,6 +8,7 @@ import OnboardingScreen from "./src/screens/Onboarding";
 import FeedScreen from "./src/screens/FeedScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 import MakePostScreen from "./src/screens/MakePostScreen";
+import SinglePostScreen from "./src/screens/SinglePostScreen";
 import { RootStackParamList } from "./src/navigation/RootStackParamList";
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -85,6 +86,11 @@ const App = () => {
         <Stack.Screen
           name="MakePost"
           component={MakePostScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SinglePostScreen"
+          component={SinglePostScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
