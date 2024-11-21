@@ -16,6 +16,8 @@ import { ActivityIndicator } from "react-native";
 
 import { Alert } from "react-native";
 
+const DEFAULT_AVATAR_URL = "https://via.placeholder.com/150";
+
 const handleError = (error: any, context: string) => {
   console.error(`${context}:`, error);
   Alert.alert("Error", `Something went wrong: ${error.message}`);
@@ -62,6 +64,14 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const getUserAvatar = async (avatarId: string) => {
     try {
+      if (!avatarId) {
+        setUser((prevUser) => ({
+          ...prevUser,
+          userAvatarUrl: DEFAULT_AVATAR_URL,
+        }));
+        return;
+      }
+
       const response = await fetch(
         `http://${SERVERIP}:${SERVERPORT}/api/files/userAvatar/${avatarId}`
       );
