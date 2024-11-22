@@ -200,12 +200,10 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
           {user.userName} | {user.profileName}
         </Text>
       </View>
-
       {/* Bio */}
       <View style={styles.bioSection}>
         <Text style={styles.bio}>{user.profileDescription}</Text>
       </View>
-
       {/* Followers/Following Section */}
       <View style={styles.followSection}>
         <View style={styles.followCard}>
@@ -221,7 +219,6 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={styles.followLabel}>Following</Text>
         </View>
       </View>
-
       {/* User Posts List */}
       <FlatList
         data={user.ownedPosts}
@@ -253,21 +250,21 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
           style={styles.iconButton}
           onPress={() => navigation.navigate("Feed", { userId })}
         >
-          <Ionicons name="musical-notes" size={30} color="#A8EB12" />
+          <Ionicons name="musical-notes" size={50} color="#A8EB12" />
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.addButton}
+          style={styles.iconButton}
           onPress={() => navigation.navigate("MakePost", { userId })}
         >
-          <Ionicons name="add-circle" size={70} color="#A8EB12" />
+          <Ionicons name="add-circle-outline" size={50} color="#A8EB12" />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => navigation.navigate("Profile", { userId })}
         >
-          <Ionicons name="person-circle-outline" size={40} color="#fff" />
+          <Ionicons name="person-circle-outline" size={50} color="#fff" />
         </TouchableOpacity>
       </View>
     </View>
@@ -369,13 +366,13 @@ const styles = StyleSheet.create({
   },
   footer: {
     height: 80,
-    backgroundColor: "#000",
+    backgroundColor: "#000000",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
     borderTopColor: "#4D4D4D",
     borderTopWidth: 1,
+    paddingHorizontal: 40,
   },
   iconButton: {
     padding: 10,
