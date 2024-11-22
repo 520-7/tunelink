@@ -97,13 +97,6 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
           <Ionicons name="musical-notes" size={30} color="#A8EB12" />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={() => navigation.navigate("Search", { userId })}
-        >
-          <Ionicons name="search-outline" size={30} color="#A8EB12" />
-        </TouchableOpacity>
-
 
         <TouchableOpacity
           style={styles.addButton}

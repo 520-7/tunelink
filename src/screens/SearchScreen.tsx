@@ -158,13 +158,14 @@ const SearchScreen: React.FC<Props> = ({ navigation, route}) => {
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.resultItem}>
+              {/* in progress
               <Image
                 source={{
                   uri: item.userAvatarUrl,
                 }}
                 style={styles.avatar}
               />
-
+              */}
               <Text style={styles.resultText}>{item.userName}</Text>
               <Text style={styles.resultSubText}>{item.profileName}</Text>
             </TouchableOpacity>
