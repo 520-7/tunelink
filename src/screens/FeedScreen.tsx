@@ -71,14 +71,6 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      {/* Profile Button at the Top Right */}
-      <TouchableOpacity
-        style={styles.profileButton}
-        onPress={() => navigation.navigate("Profile", { userId })}
-      >
-        <Ionicons name="person-circle-outline" size={40} color="#fff" />
-      </TouchableOpacity>
-
       <FlatList
         data={posts}
         keyExtractor={(item) => item.id}
@@ -113,10 +105,7 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
           style={styles.iconButton}
           onPress={() => navigation.navigate("Profile", { userId })}
         >
-          <Image
-            source={{ uri: "https://randomuser.me/api/portraits/men/30.jpg" }}
-            style={styles.profilePic}
-          />
+          <Ionicons name="person-circle-outline" size={40} color="#fff" />
         </TouchableOpacity>
       </View>
     </View>

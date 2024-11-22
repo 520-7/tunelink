@@ -290,6 +290,7 @@ const SinglePostScreen: React.FC<Props> = ({ navigation, route }) => {
     </ScrollView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

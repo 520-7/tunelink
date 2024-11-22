@@ -267,10 +267,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
           style={styles.iconButton}
           onPress={() => navigation.navigate("Profile", { userId })}
         >
-          <Image
-            source={{ uri: "https://randomuser.me/api/portraits/men/30.jpg" }}
-            style={styles.profilePic}
-          />
+          <Ionicons name="person-circle-outline" size={40} color="#fff" />
         </TouchableOpacity>
       </View>
     </View>
