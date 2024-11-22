@@ -75,6 +75,7 @@ const SearchScreen: React.FC<Props> = ({ navigation, route}) => {
 
     try {
       if (searchByGenre) {
+        //not sure how to properly implement genre call, seems different than the other endpoints
         const options = {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -95,7 +96,10 @@ const SearchScreen: React.FC<Props> = ({ navigation, route}) => {
         const response = await fetch(
           `http://${SERVERIP}:${SERVERPORT}/api/user/username/${query}`
         );
-        if (!response.ok) {
+        if (response.status == 404) {
+          Alert.alert("Error", `User could not be found :(`)
+        } 
+        else if (!response.ok) {
           throw new Error(`Error fetching user ${query}: ${response.statusText}`);
         }
 
