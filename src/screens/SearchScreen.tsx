@@ -161,7 +161,10 @@ const SearchScreen: React.FC<Props> = ({ navigation, route}) => {
           data={results}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.resultItem}>
+            <TouchableOpacity 
+              style={styles.resultItem}
+              onPress={() => navigation.navigate("Profile", { userId: item._id })}
+            >
               {/* in progress
               <Image
                 source={{

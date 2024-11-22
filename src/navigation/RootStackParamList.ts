@@ -25,4 +25,7 @@ export type RootStackParamList = {
     Search: {
       userId: string;
     }
+    User: {
+      userId: string;
+    }
 };

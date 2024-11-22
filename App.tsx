@@ -11,6 +11,8 @@ import FeedScreen from "./src/screens/FeedScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 import MakePostScreen from "./src/screens/MakePostScreen";
 import SinglePostScreen from "./src/screens/SinglePostScreen";
+import UserScreen from "./src/screens/UserScreen";
+
 import { RootStackParamList } from "./src/navigation/RootStackParamList";
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -103,6 +105,11 @@ const App = () => {
         <Stack.Screen
           name="Search"
           component={SearchScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="User"
+          component={UserScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
