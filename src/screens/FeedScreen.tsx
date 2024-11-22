@@ -7,11 +7,12 @@ import {
   Dimensions,
   Image,
 } from "react-native";
-import PostComponent from "../components/PostComponent";
+import PostComponent from "../components/PostComponent"
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../navigation/RootStackParamList";
+import { UserComment } from "../navigation/RootStackParamList";
 
 type FeedScreenNavigationProp = StackNavigationProp<RootStackParamList, "Feed">;
 type FeedScreenRouteProp = RouteProp<RootStackParamList, "Feed">;
@@ -24,39 +25,31 @@ interface Props {
 const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
   const userId = route.params.userId;
   const SCREEN_HEIGHT = Dimensions.get("window").height;
-  const posts = [
+  const posts: {
+    id: string;
+    userAvatar: string;
+    username: string;
+    timestamp: string;
+    location: string;
+    videoUri: string;
+    description: string;
+    comments: UserComment[]; // Explicitly use UserComment
+  }[] = [
     {
       id: "1",
       userAvatar: "https://randomuser.me/api/portraits/men/32.jpg",
       username: "User456",
       timestamp: "2h ago",
       location: "New York",
-      videoUri:
-        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      videoUri: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
       description: "Just discovered this amazing track! 😍",
       comments: [
         { username: "Commenter1", text: "Great track!" },
         { username: "Commenter2", text: "This is my jam!" },
-        { username: "Commenter3", text: "Loved it!" },
       ],
     },
-    {
-      id: "2",
-      userAvatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      username: "User789",
-      timestamp: "1h ago",
-      location: "Los Angeles",
-      videoUri:
-        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-      description: "This song is so chill! 🎧",
-      comments: [
-        { username: "Commenter4", text: "Relaxing vibes!" },
-        { username: "Commenter5", text: "Perfect for studying!" },
-        { username: "Commenter6", text: "Smooth!" },
-      ],
-    },
-    // Add more posts as needed
   ];
+
 
   // State to track which post is currently visible
   const [currentVisibleIndex, setCurrentVisibleIndex] = useState<number>(0);
@@ -68,6 +61,12 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
       setCurrentVisibleIndex(viewableItems.viewableItems[0].index);
     }
   });
+
+
+  // Comments
+  const onCommentPress = (postId: string, comments: UserComment[]) => {
+    navigation.navigate("CommentScreen", { postId, comments });
+  };
 
   return (
     <View style={styles.container}>
@@ -86,6 +85,7 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
           <PostComponent
             post={item}
             isCurrent={index === currentVisibleIndex}
+            onCommentPress={onCommentPress}
           />
         )}
         pagingEnabled

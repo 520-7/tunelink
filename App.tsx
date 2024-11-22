@@ -10,6 +10,7 @@ import ProfileScreen from "./src/screens/ProfileScreen";
 import MakePostScreen from "./src/screens/MakePostScreen";
 import SinglePostScreen from "./src/screens/SinglePostScreen";
 import { RootStackParamList } from "./src/navigation/RootStackParamList";
+import CommentScreen from "./src/screens/CommentScreen";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -93,6 +94,16 @@ const App = () => {
           component={SinglePostScreen}
           options={{ headerShown: false }}
         />
+
+        <Stack.Screen
+          name="CommentScreen"
+          component={CommentScreen}
+          options={{
+            presentation: "modal",
+            headerShown: false,
+          }}
+        />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
