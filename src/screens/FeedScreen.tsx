@@ -90,9 +90,28 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
 
       {/* Footer */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.iconButton}>
-          <Ionicons name="musical-notes" size={50} color="#A8EB12" />
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => navigation.navigate("Feed", { userId })}
+        >
+          <Ionicons name="musical-notes" size={30} color="#A8EB12" />
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => navigation.navigate("Search", { userId })}
+        >
+          <Ionicons name="search-outline" size={30} color="#A8EB12" />
+        </TouchableOpacity>
+
+
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => navigation.navigate("Search", { userId })}
+        >
+          <Ionicons name="search-outline" size={30} color="#A8EB12" />
+        </TouchableOpacity>
+
 
         <TouchableOpacity
           style={styles.iconButton}
@@ -146,7 +165,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     height: 80,
-    backgroundColor: "#000000",
+    backgroundColor: "#000",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -155,12 +174,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   iconButton: {
-    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   addButton: {
-    position: "absolute",
-    bottom: 30,
-    transform: [{ translateX: 160 }, { translateY: 20 }],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   profilePic: {
     width: 50,

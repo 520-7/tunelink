@@ -16,41 +16,46 @@ import { ActivityIndicator } from "react-native";
 
 import { Alert } from "react-native";
 
-const DEFAULT_AVATAR_URL = "https://via.placeholder.com/150";
-
 const handleError = (error: any, context: string) => {
   console.error(`${context}:`, error);
   Alert.alert("Error", `Something went wrong: ${error.message}`);
 };
 
-type ProfileScreenNavigationProp = StackNavigationProp<
+type FollowScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "Profile"
+  "Follow"
 >;
-type ProfileScreenRouteProp = RouteProp<RootStackParamList, "Profile">;
+type FollowScreenRouteProp = RouteProp<RootStackParamList, "Follow">;
 
 const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
 const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
 
 interface Props {
-  navigation: ProfileScreenNavigationProp;
-  route: ProfileScreenRouteProp;
+  navigation: FollowScreenNavigationProp;
+  route: FollowScreenRouteProp;
 }
 
-const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
-  const [user, setUser] = useState({
-    _id: "",
-    userName: "",
-    profileName: "",
-    followerCount: 0,
-    following: [],
-    totalLikeCount: 0,
-    profileDescription: "",
-    genres: [] as string[],
-    ownedPosts: [] as any[],
-    userAvatarUrl: "",
-  });
+interface FollowingUser {
+    id: string; 
+    userName: string;
+    avatarUrl: string;
+  }
+  
 
+const FollowScreen: React.FC<Props> = ({ navigation, route }) => {
+    const [user, setUser] = useState({
+        _id: "",
+        userName: "",
+        profileName: "",
+        followerCount: 0,
+        following: [] as FollowingUser[], 
+        totalLikeCount: 0,
+        profileDescription: "",
+        genres: [] as string[],
+        ownedPosts: [] as any[],
+        userAvatarUrl: ""
+      });
+      
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -64,14 +69,6 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const getUserAvatar = async (avatarId: string) => {
     try {
-      if (!avatarId) {
-        setUser((prevUser) => ({
-          ...prevUser,
-          userAvatarUrl: DEFAULT_AVATAR_URL,
-        }));
-        return;
-      }
-
       const response = await fetch(
         `http://${SERVERIP}:${SERVERPORT}/api/files/userAvatar/${avatarId}`
       );
@@ -97,59 +94,38 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
-  const getPosts = async (ownedPosts: string[]) => {
+  const getFollowing = async (followingUsernames: string[]) => {
     try {
-      const fetchedPosts = await Promise.all(
-        ownedPosts.map(async (postId) => {
+      const fetchedUsers = await Promise.all(
+        followingUsernames.map(async (username) => {
           const response = await fetch(
-            `http://${SERVERIP}:${SERVERPORT}/api/post/${postId}`
+            `http://${SERVERIP}:${SERVERPORT}/api/user/username/${username}`
           );
-
+  
           if (!response.ok) {
-            throw new Error(`Error fetching post: ${response.statusText}`);
+            throw new Error(`Error fetching user: ${response.statusText}`);
           }
-
-          const post = await response.json();
-
-          if (post.albumCoverUrl) {
-            const albumCoverResponse = await fetch(
-              `http://${SERVERIP}:${SERVERPORT}/api/files/albumCover/${post.albumCoverUrl}`
-            );
-
-            if (!albumCoverResponse.ok) {
-              throw new Error(
-                `Error fetching album cover: ${albumCoverResponse.statusText}`
-              );
-            }
-
-            const blob = await albumCoverResponse.blob();
-
-            const reader = new FileReader();
-            const base64Url = await new Promise<string>((resolve, reject) => {
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.onerror = reject;
-              reader.readAsDataURL(blob);
-            });
-
-            post.albumCoverUrl = `data:image/jpeg;base64,${
-              base64Url.split(",")[1]
-            }`;
-          }
-
-          return post;
+  
+          const user = await response.json();
+  
+          return {
+            id: user._id,
+            userName: user.userName,
+            avatarUrl: user.userAvatarUrl,
+          };
         })
       );
-
+  
       setUser((prevUser) => ({
         ...prevUser,
-        ownedPosts: fetchedPosts,
+        following: fetchedUsers,
       }));
     } catch (error) {
-      handleError(error, "Fetching Posts");
-      console.error("Failed to fetch posts:", error);
+      handleError(error, "Fetching Following");
+      console.error("Failed to fetch following:", error);
     }
   };
-
+  
   const getUser = async (userId: string) => {
     setLoading(true);
     try {
@@ -162,7 +138,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
         console.log("Successfully retrieved user");
         setUser(responseData);
         getUserAvatar(responseData.userAvatarUrl);
-        getPosts(responseData.ownedPosts);
+        getFollowing(responseData.following);
       } else {
         console.error("Server error:", response);
       }
@@ -189,100 +165,58 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       {/* Header */}
+
       <View style={styles.header}>
+
         <Image
           source={{
             uri: user.userAvatarUrl,
           }}
           style={styles.avatar}
         />
+        <TouchableOpacity
+            style={styles.header}
+            onPress={() => navigation.navigate("Profile", { userId })}
+          >
+            <Text style = {styles.followCount}>
+              {"< Back to Profile"}
+            </Text>
+        </TouchableOpacity>
         <Text style={styles.username}>
-          {user.userName} | {user.profileName}
+          {user.userName} 
         </Text>
 
+
       </View>
-      {/* Bio */}
-      <View style={styles.bioSection}>
-        <Text style={styles.bio}>{user.profileDescription}</Text>
+
+      <View style={styles.header}>
+
+        <Text style={styles.username}>
+          {"Following:"} 
+        </Text>
+
+
       </View>
-      {/* Followers/Following Section */}
-      <View style={styles.followSection}>
-        <TouchableOpacity
-            style={styles.followCard}
-            onPress={() => navigation.navigate("Feed", { userId })}
-          >
-            <Text style={styles.followCount}>
-              {user.followerCount.toLocaleString()}
-            </Text>
-            <Text style={styles.followLabel}>Followers</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-            style={styles.followCard}
-            onPress={() => navigation.navigate("Follow", { userId })}
-          >
-            <Text style={styles.followCount}>
-              {user.following.length.toLocaleString()}
-            </Text>
-            <Text style={styles.followLabel}>Following</Text>
-        </TouchableOpacity>
-        
-      </View>
-      {/* User Posts List */}
+
+
+      {/* Following List */}
       <FlatList
-        data={user.ownedPosts}
-        keyExtractor={(item, index) => item._id || String(index)}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.postContainer}
-            onPress={() =>
-              navigation.navigate("SinglePostScreen", { postId: item._id })
-            }
-          >
-            <Image
-              source={{ uri: item.albumCoverUrl }}
-              style={styles.albumCover}
-            />
-            <View style={styles.textContainer}>
-              <Text style={styles.postTitle}>{item.caption}</Text>
-              <Text style={styles.postDate}>{item.timestamp}</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-        style={styles.postList}
-        contentContainerStyle={styles.postListContent}
+      data={user.following}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => (
+          <View style={styles.followingContainer}>
+          <Image
+              source={{ uri: item.avatarUrl }}
+              style={styles.followingAvatar}
+          />
+          <Text style={styles.followingUsername}>{item.userName}</Text>
+          </View>
+      )}
+      style={styles.list}
+      contentContainerStyle={styles.listContent}
       />
 
-      {/* Footer */}
-      <View style={styles.footer}>
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={() => navigation.navigate("Feed", { userId })}
-        >
-          <Ionicons name="musical-notes" size={50} color="#A8EB12" />
-        </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={() => navigation.navigate("Search", { userId })}
-        >
-          <Ionicons name="search-outline" size={30} color="#A8EB12" />
-        </TouchableOpacity>
-
-
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={() => navigation.navigate("MakePost", { userId })}
-        >
-          <Ionicons name="add-circle-outline" size={50} color="#A8EB12" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={() => navigation.navigate("Profile", { userId })}
-        >
-          <Ionicons name="person-circle-outline" size={50} color="#fff" />
-        </TouchableOpacity>
-      </View>
     </View>
   );
 };
@@ -382,27 +316,55 @@ const styles = StyleSheet.create({
   },
   footer: {
     height: 80,
-    backgroundColor: "#000000",
+    backgroundColor: "#000",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: 20,
     borderTopColor: "#4D4D4D",
     borderTopWidth: 1,
-    paddingHorizontal: 40,
   },
   iconButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 10,
   },
   addButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    position: "absolute",
+    bottom: 30,
+    transform: [{ translateX: 160 }, { translateY: 20 }],
   },
-  profilePic: {
+  FollowPic: {
     width: 50,
     height: 50,
     borderRadius: 20,
   },
+  followingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 15,
+    borderBottomColor: "#4D4D4D",
+    borderBottomWidth: 1,
+    backgroundColor: "#1a1a1a",
+    marginHorizontal: 10,
+    marginVertical: 5,
+    borderRadius: 10,
+  },
+  followingAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 15,
+  },
+  followingUsername: {
+    color: "#fff",
+    fontSize: 18,
+  },
+  list: {
+    flex: 1,
+  },
+  listContent: {
+    padding: 10,
+  },
+  
 });
 
-export default ProfileScreen;
+export default FollowScreen;

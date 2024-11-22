@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import SplashScreen from "./src/screens/SplashScreen";
+import FollowScreen from "./src/screens/FollowScreen";
+import SearchScreen from "./src/screens/SearchScreen";
 import SignupScreen from "./src/screens/SignupScreen";
 import LoginScreen from "./src/screens/LoginScreen";
 import OnboardingScreen from "./src/screens/Onboarding";
@@ -91,6 +93,16 @@ const App = () => {
         <Stack.Screen
           name="SinglePostScreen"
           component={SinglePostScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Follow"
+          component={FollowScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Search"
+          component={SearchScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
