@@ -6,6 +6,8 @@ import {
   Image,
   Dimensions,
   Text,
+  ScrollView,
+  Linking,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -124,7 +126,13 @@ const SinglePostScreen: React.FC<Props> = ({ navigation, route }) => {
 
       const postData = await postResponse.json();
       console.log(JSON.stringify(postData));
-      setPost(postData);
+
+      const sanitizedPostData = {
+        ...postData,
+        outLinks: JSON.parse(postData.outLinks),
+      };
+
+      setPost(sanitizedPostData);
 
       if (postData.audioUrl !== "") {
         const audioResponse = await fetch(
@@ -173,9 +181,14 @@ const SinglePostScreen: React.FC<Props> = ({ navigation, route }) => {
   }, [route.params?.postId]);
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      contentContainerStyle={styles.scrollViewContent}
+      style={styles.container}
+    >
       {isLoading ? (
-        <ActivityIndicator size="large" color="#A8EB12" />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#A8EB12" />
+        </View>
       ) : (
         <>
           {/* Album Cover */}
@@ -202,6 +215,26 @@ const SinglePostScreen: React.FC<Props> = ({ navigation, route }) => {
             <Text style={styles.details}>
               {`Likes: ${post.likesCount} | Posted at: ${post.timestamp}`}
             </Text>
+            <Text style={styles.caption}>OutLinks</Text>
+
+            {Array.isArray(post.outLinks) ? (
+              post.outLinks.map((outlink, index) => (
+                <View key={index} style={styles.outlinkContainer}>
+                  <Text style={styles.details}>
+                    {`Media: ${outlink?.source}`}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => Linking.openURL(outlink?.url)}
+                  >
+                    <Text style={[styles.details, styles.link]}>
+                      {outlink?.url}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.details}>No outlinks available</Text>
+            )}
           </View>
 
           {/* Audio Player */}
@@ -232,7 +265,7 @@ const SinglePostScreen: React.FC<Props> = ({ navigation, route }) => {
                     soundRef.current = sound;
                     setIsPlaying(true);
                     sound.setOnPlaybackStatusUpdate((status) => {
-                      if (status.didJustFinish) {
+                      if ("didJustFinish" in status && status.didJustFinish) {
                         sound.unloadAsync();
                         soundRef.current = null;
                         setIsPlaying(false);
@@ -254,17 +287,33 @@ const SinglePostScreen: React.FC<Props> = ({ navigation, route }) => {
           )}
         </>
       )}
-    </View>
+    </ScrollView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#000000",
+    paddingTop: 50,
+  },
+  scrollViewContent: {
     alignItems: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 50,
+  },
+  loadingContainer: {
+    flex: 1,
     justifyContent: "center",
-    padding: 50,
+    alignItems: "center",
+    height: Dimensions.get("window").height,
+  },
+  outlinkContainer: {
+    alignItems: "center",
+    marginVertical: 5,
+  },
+  link: {
+    color: "#A8EB12",
+    textDecorationLine: "underline",
   },
   likeButton: {
     padding: 10,
