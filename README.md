@@ -1,62 +1,72 @@
-# Devs Please update .env
-
-use `ifconfig` on mac or `ipcofig` if windows to figure out your local ip
-
-it will be under env0, copy the ip address there too .env, it changes as you move around campus, be careful, make sure it's updated.
-
 # 🎵 Tunelink – React Native
+
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## Overview
 
 Welcome to the **Music Sharing App**! This app, built with React Native, allows users to share, explore, and interact with music-centric posts in a social media format, much like Instagram but dedicated to music lovers. This guide will walk you through the setup and usage of the application.
 
----
+### Backend Setup  
 
-## 🚀 Getting Started  
+First, set up and run the backend by following the instructions at [Tunelink Backend Repository](https://github.com/520-7/tunelink-backend). 
 
-Follow the steps below to install and run the app locally on your device.
+### Prerequisites  
 
-### 1. Prerequisites  
 - **Node.js** installed on your machine  
 - **npm** (comes with Node.js)  
 - **Expo Go** app installed on your mobile device ([Android](https://play.google.com/store/apps/details?id=host.exp.exponent) / [iOS](https://apps.apple.com/app/expo-go/id982107779))  
-- A smartphone with a camera to scan the QR code  
+- A smartphone with a camera to scan the QR code
 
-### 2. Clone the Repository  
+### Clone the Repository  
 
 git clone https://github.com/520-7/tunelink-frontend
 cd tunelink-frontend
 
+## Getting Started
 
-### 3. Install dependencies
+To install all dependencies for the project, you can run:
 
-Before running the application, you need to install the required dependencies. The application uses **npm** (Node Package Manager) to manage these dependencies. 
+### `npm install`
 
+### `npm start`
 
-1. **Open a Terminal/Command Prompt**  
-   Navigate to the root directory of the cloned repository where the `package.json` file is located.
+### `npm run build`
 
-2. **Run the Installation Command**  
-   Execute the following command to install all the necessary packages:
+### `npm run dev`
 
-   ```bash
-   🌟 npm install 🌟
+Scan the qr code througg the Expo Go app, or select the device type to display the simulation.
 
-### 4. Run application
-npm start
+# How To Use the App
 
+## Login/Sign Up  
+The login and sign-up screen allows users to create a new account or log in to an existing one. During the account creation process, users can select their favorite music genres to personalize their experience. Once logged in, users are redirected to the feed screen, where they can start exploring and interacting with posts.
 
+## Feed Screen  
+The feed screen is the central space for browsing music-centric posts. Users can scroll through posts featuring videos with audio tracks, view details about who posted the content, and interact by liking or commenting on posts. This screen provides a dynamic and engaging way for users to discover and enjoy content shared by the community.
 
-### Routing Commit Notes: connecting the frontend to the backend
+## Profile Screen  
+The profile screen is where users can view and manage their activity within the app. It displays their uploaded posts, including song titles, comments, and audio links. Users can also see their number of followers and following, providing an overview of their social interactions. Additionally, users can manage their profile and posts from this screen, ensuring their content stays organized and up-to-date.
 
-- what was done
-   - used try catch, async await fetch calls to the server
-   - utilized local IP, changed backend to accept local IP rather than just localhost
-   - changed navigation such that when a new screen is entered, the user that signed up's mongoDB _id is passed. Each screen then fetches the data from the database based on _id
-   - only implemented fetch calls in the signup screen, onboarding screen, and profile screen. Feed screen and make post screen has _id available but no fetch calls have been made to retrieve posts and add posts yet.
-      - within the profile, used useState and useEffect to handle repeated updates to a userId. Updates user info each render
+## Post Button  
+The post button allows users to contribute to the community by uploading new content. When creating a post, users can add a song title, write a comment, and provide an audio link to the content they are sharing. This feature enables users to actively engage with the app and share their favorite music or original creations.
 
-- what still needs to be done
-   - implement fetch calls for posts in feed and upload post screens
-   - login screen. Only implemented for sign up screen, make sure _id is routed over from the login screen to other screens
-      - change login var in RootStackParamList.ts to account for this
-   - Right now you have to copy paste your local ip into every single fetch call. Need to implement environment variable to handle this
-   
+## Search Screen  
+The search screen is designed to help users discover content and connect with others in the community. Users can search for specific accounts by name or handle and filter results based on genres or other criteria. This screen enhances the app’s usability by simplifying the process of finding and exploring new users and content.
+
+## Recommendation Algorithm  
+The recommendation algorithm is a core feature of the app that personalizes the user experience. It curates posts based on the user’s selected genres during signup and interactions within the app. Additionally, it considers content shared by the user’s followers to ensure recommendations are relevant and engaging. This feature helps users discover new music and posts that align with their tastes and social connections.
+
+# Team Member Names:
+
+Aaryan Nair
+
+Hanna Jiang
+
+Ozel Yilamzel
+
+Rachel Lahav
+
+Ryan Zaid
+
+# GitHub Respository Link:
+Link: https://github.com/520-7/tunelink-frontend
