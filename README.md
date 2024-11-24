@@ -1,6 +1,6 @@
-# 🎵 Tunelink – React Native
+# Tunelink – React Native
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project was bootstrapped with [React Native CLI](https://reactnative.dev/docs/environment-setup) and is powered by [Expo](https://expo.dev/).
 
 ## Overview
 
