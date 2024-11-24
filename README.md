@@ -26,9 +26,9 @@ cd tunelink-frontend
 
 To install all dependencies for the project, you can run:
 
-### `npm install`
+### ```npm install```
 
-### `npm start`
+### ```npm start```
 
 Scan the qr code througg the Expo Go app, or select the device type to display the simulation.
 
