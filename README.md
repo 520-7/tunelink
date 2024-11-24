@@ -30,10 +30,6 @@ To install all dependencies for the project, you can run:
 
 ### `npm start`
 
-### `npm run build`
-
-### `npm run dev`
-
 Scan the qr code througg the Expo Go app, or select the device type to display the simulation.
 
 # How To Use the App
