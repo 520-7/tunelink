@@ -21,11 +21,19 @@ export type RootStackParamList = {
     };
     Follow: {
       userId: string;
+      currentUserId: string;
     }
     Search: {
       userId: string;
     }
     User: {
       userId: string;
+    }
+    EditProfile: {
+      userId: string;
+    }
+    OtherUserProfile: {
+      userId: string;
+      otherUserId: string;
     }
 };

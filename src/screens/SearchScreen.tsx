@@ -8,13 +8,12 @@ import {
   Text,
   ActivityIndicator,
   Alert,
-  Image
+  Image,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../navigation/RootStackParamList";
 import { RouteProp } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-
 
 const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
 const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
@@ -24,7 +23,6 @@ type SearchScreenNavigationProp = StackNavigationProp<
   "Search"
 >;
 type SearchScreenRouteProp = RouteProp<RootStackParamList, "Search">;
-
 
 const handleError = (error: any, context: string) => {
   console.error(`${context}:`, error);
@@ -43,8 +41,7 @@ interface Props {
   route: SearchScreenRouteProp;
 }
 
-
-const SearchScreen: React.FC<Props> = ({ navigation, route}) => {
+const SearchScreen: React.FC<Props> = ({ navigation, route }) => {
   const [user, setUser] = useState({
     _id: "",
     userName: "",
@@ -77,37 +74,37 @@ const SearchScreen: React.FC<Props> = ({ navigation, route}) => {
       if (searchByGenre) {
         //not sure how to properly implement genre call, seems different than the other endpoints
         const options = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ genre: query }),
-          };
-          
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ genre: query }),
+        };
+
         const endpoint = `http://${SERVERIP}:${SERVERPORT}/api/user/search-by-genre/${query}`;
         const response = await fetch(endpoint);
 
         if (!response.ok) {
-          throw new Error(`Error fetching genre specified users: ${response.statusText}`);
+          throw new Error(
+            `Error fetching genre specified users: ${response.statusText}`
+          );
         }
 
         const data = await response.json();
         setResults(data.users);
-      }
-      else {
+      } else {
         const response = await fetch(
           `http://${SERVERIP}:${SERVERPORT}/api/user/username/${query}`
         );
         if (response.status == 404) {
-          Alert.alert("Error", `User could not be found :(`)
-        } 
-        else if (!response.ok) {
-          throw new Error(`Error fetching user ${query}: ${response.statusText}`);
+          Alert.alert("Error", `User could not be found :(`);
+        } else if (!response.ok) {
+          throw new Error(
+            `Error fetching user ${query}: ${response.statusText}`
+          );
         }
 
         const data = await response.json();
         setResults([data]);
-
       }
-
     } catch (error) {
       handleError(error, "Search");
     } finally {
@@ -161,9 +158,14 @@ const SearchScreen: React.FC<Props> = ({ navigation, route}) => {
           data={results}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.resultItem}
-              onPress={() => navigation.navigate("Profile", { userId: item._id })}
+              onPress={() =>
+                navigation.navigate("OtherUserProfile", {
+                  userId: userId,
+                  otherUserId: item._id,
+                })
+              }
             >
               {/* in progress
               <Image
@@ -189,36 +191,30 @@ const SearchScreen: React.FC<Props> = ({ navigation, route}) => {
           style={styles.iconButton}
           onPress={() => navigation.navigate("Feed", { userId })}
         >
-          <Ionicons name="musical-notes" size={30} color="#A8EB12" />
+          <Ionicons name="musical-notes" size={35} color="#A8EB12" />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => navigation.navigate("Search", { userId })}
         >
-          <Ionicons name="search-outline" size={30} color="#A8EB12" />
+          <Ionicons name="search-outline" size={35} color="#A8EB12" />
         </TouchableOpacity>
-
 
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate("MakePost", { userId })}
         >
-          <Ionicons name="add-circle" size={70} color="#A8EB12" />
+          <Ionicons name="add-circle-outline" size={35} color="#A8EB12" />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => navigation.navigate("Profile", { userId })}
         >
-          <Image
-            source={{ uri: "https://randomuser.me/api/portraits/men/30.jpg" }}
-            style={styles.profilePic}
-          />
+          <Ionicons name="person-circle-outline" size={35} color="#fff" />
         </TouchableOpacity>
       </View>
-
-
     </View>
   );
 };
@@ -235,12 +231,12 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   iconButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   addButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   profilePic: {
     width: 50,
@@ -253,7 +249,6 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
   },
-
 
   container: {
     flex: 1,

@@ -12,7 +12,8 @@ import ProfileScreen from "./src/screens/ProfileScreen";
 import MakePostScreen from "./src/screens/MakePostScreen";
 import SinglePostScreen from "./src/screens/SinglePostScreen";
 import UserScreen from "./src/screens/UserScreen";
-
+import EditProfileScreen from "./src/screens/EditProfile";
+import OtherUserProfileScreen from "./src/screens/OtherUserProfileScreen";
 import { RootStackParamList } from "./src/navigation/RootStackParamList";
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -110,6 +111,16 @@ const App = () => {
         <Stack.Screen
           name="User"
           component={UserScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="EditProfile"
+          component={EditProfileScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="OtherUserProfile"
+          component={OtherUserProfileScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
