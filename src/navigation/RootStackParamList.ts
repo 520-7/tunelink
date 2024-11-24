@@ -19,4 +19,13 @@ export type RootStackParamList = {
     SinglePostScreen: {
       postId: string;
     };
+    Follow: {
+      userId: string;
+    }
+    Search: {
+      userId: string;
+    }
+    User: {
+      userId: string;
+    }
 };

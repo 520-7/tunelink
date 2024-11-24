@@ -18,26 +18,27 @@ import { Alert } from "react-native";
 
 const DEFAULT_AVATAR_URL = "https://via.placeholder.com/150";
 
+
 const handleError = (error: any, context: string) => {
   console.error(`${context}:`, error);
   Alert.alert("Error", `Something went wrong: ${error.message}`);
 };
 
-type ProfileScreenNavigationProp = StackNavigationProp<
+type UserScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "Profile"
+  "User"
 >;
-type ProfileScreenRouteProp = RouteProp<RootStackParamList, "Profile">;
+type UserScreenRouteProp = RouteProp<RootStackParamList, "User">;
 
 const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
 const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
 
 interface Props {
-  navigation: ProfileScreenNavigationProp;
-  route: ProfileScreenRouteProp;
+  navigation: UserScreenNavigationProp;
+  route: UserScreenRouteProp;
 }
 
-const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
+const UserScreen: React.FC<Props> = ({ navigation, route }) => {
   const [user, setUser] = useState({
     _id: "",
     userName: "",
@@ -405,4 +406,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProfileScreen;
+export default UserScreen;
