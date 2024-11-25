@@ -7,7 +7,6 @@ import {
   Image,
   Dimensions,
   Text,
-  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -16,30 +15,30 @@ import { RouteProp } from "@react-navigation/native";
 import { ActivityIndicator } from "react-native";
 
 import { Alert } from "react-native";
-import { Button } from "react-native-paper";
 
 const DEFAULT_AVATAR_URL = "https://via.placeholder.com/150";
+
 
 const handleError = (error: any, context: string) => {
   console.error(`${context}:`, error);
   Alert.alert("Error", `Something went wrong: ${error.message}`);
 };
 
-type ProfileScreenNavigationProp = StackNavigationProp<
+type UserScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "Profile"
+  "User"
 >;
-type ProfileScreenRouteProp = RouteProp<RootStackParamList, "Profile">;
+type UserScreenRouteProp = RouteProp<RootStackParamList, "User">;
 
 const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
 const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
 
 interface Props {
-  navigation: ProfileScreenNavigationProp;
-  route: ProfileScreenRouteProp;
+  navigation: UserScreenNavigationProp;
+  route: UserScreenRouteProp;
 }
 
-const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
+const UserScreen: React.FC<Props> = ({ navigation, route }) => {
   const [user, setUser] = useState({
     _id: "",
     userName: "",
@@ -190,84 +189,51 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        style={styles.mainScroll}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <Image
-            source={{
-              uri: user.userAvatarUrl,
-            }}
-            style={styles.avatar}
-          />
-          <View style={styles.headerContent}>
-            <Text style={styles.username}>
-              {user.userName} | {user.profileName}
-            </Text>
-            <TouchableOpacity
-              style={styles.refreshButton}
-              onPress={refreshData}
-              disabled={refreshing}
-            >
-              <Ionicons
-                name="refresh"
-                size={24}
-                color="#A8EB12"
-                style={[styles.refreshIcon, refreshing && styles.spinning]}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-        {/* Bio */}
-        <View style={styles.bioSection}>
-          <Text style={styles.bio}>{user.profileDescription}</Text>
-        </View>
-        <View style={styles.genresContainer}>
-          {user.genres.map((genre, index) => (
-            <Text style={styles.genre} key={index}>
-              {genre}
-            </Text>
-          ))}
-        </View>
-        <View style={styles.buttonContainer}>
-          <Button
-            mode="contained"
-            style={styles.button}
-            onPress={() => navigation.navigate("EditProfile", { userId })}
+      {/* Header */}
+      <View style={styles.header}>
+        <Image
+          source={{
+            uri: user.userAvatarUrl,
+          }}
+          style={styles.avatar}
+        />
+        <Text style={styles.username}>
+          {user.userName} | {user.profileName}
+        </Text>
+
+      </View>
+      {/* Bio */}
+      <View style={styles.bioSection}>
+        <Text style={styles.bio}>{user.profileDescription}</Text>
+      </View>
+      {/* Followers/Following Section */}
+      <View style={styles.followSection}>
+        <TouchableOpacity
+            style={styles.followCard}
+            onPress={() => navigation.navigate("Feed", { userId })}
           >
-            Edit Profile
-          </Button>
-        </View>
-        {/* Followers/Following Section */}
-        <View style={styles.followSection}>
-          <View style={styles.followCard}>
             <Text style={styles.followCount}>
               {user.followerCount.toLocaleString()}
             </Text>
             <Text style={styles.followLabel}>Followers</Text>
-          </View>
-          <TouchableOpacity
+        </TouchableOpacity>
+        <TouchableOpacity
             style={styles.followCard}
-            onPress={() =>
-              navigation.navigate("Follow", {
-                userId: userId,
-                currentUserId: userId,
-              })
-            }
+            onPress={() => navigation.navigate("Follow", { userId })}
           >
             <Text style={styles.followCount}>
               {user.following.length.toLocaleString()}
             </Text>
             <Text style={styles.followLabel}>Following</Text>
-          </TouchableOpacity>
-        </View>
-        {/* User Posts List */}
-        {user.ownedPosts.map((item, index) => (
+        </TouchableOpacity>
+        
+      </View>
+      {/* User Posts List */}
+      <FlatList
+        data={user.ownedPosts}
+        keyExtractor={(item, index) => item._id || String(index)}
+        renderItem={({ item }) => (
           <TouchableOpacity
-            key={item._id || String(index)}
             style={styles.postContainer}
             onPress={() =>
               navigation.navigate("SinglePostScreen", { postId: item._id })
@@ -282,8 +248,10 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
               <Text style={styles.postDate}>{item.timestamp}</Text>
             </View>
           </TouchableOpacity>
-        ))}
-      </ScrollView>
+        )}
+        style={styles.postList}
+        contentContainerStyle={styles.postListContent}
+      />
 
       {/* Footer */}
       <View style={styles.footer}>
@@ -291,28 +259,29 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
           style={styles.iconButton}
           onPress={() => navigation.navigate("Feed", { userId })}
         >
-          <Ionicons name="musical-notes" size={35} color="#A8EB12" />
+          <Ionicons name="musical-notes" size={50} color="#A8EB12" />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => navigation.navigate("Search", { userId })}
         >
-          <Ionicons name="search-outline" size={35} color="#A8EB12" />
+          <Ionicons name="search-outline" size={30} color="#A8EB12" />
         </TouchableOpacity>
+
 
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => navigation.navigate("MakePost", { userId })}
         >
-          <Ionicons name="add-circle-outline" size={35} color="#A8EB12" />
+          <Ionicons name="add-circle-outline" size={50} color="#A8EB12" />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => navigation.navigate("Profile", { userId })}
         >
-          <Ionicons name="person-circle-outline" size={35} color="#fff" />
+          <Ionicons name="person-circle-outline" size={50} color="#fff" />
         </TouchableOpacity>
       </View>
     </View>
@@ -320,44 +289,14 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  mainScroll: {
-    flex: 1,
-    backgroundColor: "#000", // Match your background color
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 80,
-  },
   container: {
     flex: 1,
     backgroundColor: "#000",
   },
-  genre: {
-    color: "#A8EB12",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  genresContainer: {
-    marginTop: 20,
-    justifyContent: "center",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
-  postList: {
-    flex: 0, // Change this from 1 to 0
-  },
-  buttonContainer: {
-    marginTop: 20,
+  header: {
     alignItems: "center",
+    marginTop: 50,
   },
-  button: {
-    width: "80%",
-  },
-  // header: {
-  //   alignItems: "center",
-  //   marginTop: 50,
-  // },
   avatar: {
     width: 120,
     height: 120,
@@ -384,31 +323,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 20,
   },
-  header: {
-    alignItems: "center",
-    marginTop: 50,
-    width: "100%",
-    paddingHorizontal: 20,
-  },
-  headerContent: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    position: "relative",
-    marginTop: 10,
-  },
-  refreshButton: {
-    position: "absolute",
-    right: 0,
-    padding: 5,
-  },
-  refreshIcon: {
-    opacity: 0.8,
-  },
-  spinning: {
-    opacity: 0.5,
-  },
   followCard: {
     backgroundColor: "#1a1a1a",
     borderRadius: 10,
@@ -431,6 +345,9 @@ const styles = StyleSheet.create({
   followLabel: {
     color: "#fff",
     fontSize: 14,
+  },
+  postList: {
+    flex: 1,
   },
   postListContent: {
     paddingBottom: 100, // Add some padding at the bottom for the footer
@@ -475,12 +392,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   iconButton: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   addButton: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   profilePic: {
     width: 50,
@@ -489,4 +406,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProfileScreen;
+export default UserScreen;
