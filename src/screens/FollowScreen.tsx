@@ -36,26 +36,25 @@ interface Props {
 }
 
 interface FollowingUser {
-    id: string; 
-    userName: string;
-    avatarUrl: string;
-  }
-  
+  id: string;
+  userName: string;
+  avatarUrl: string;
+}
 
 const FollowScreen: React.FC<Props> = ({ navigation, route }) => {
-    const [user, setUser] = useState({
-        _id: "",
-        userName: "",
-        profileName: "",
-        followerCount: 0,
-        following: [] as FollowingUser[], 
-        totalLikeCount: 0,
-        profileDescription: "",
-        genres: [] as string[],
-        ownedPosts: [] as any[],
-        userAvatarUrl: ""
-      });
-      
+  const [user, setUser] = useState({
+    _id: "",
+    userName: "",
+    profileName: "",
+    followerCount: 0,
+    following: [] as FollowingUser[],
+    totalLikeCount: 0,
+    profileDescription: "",
+    genres: [] as string[],
+    ownedPosts: [] as any[],
+    userAvatarUrl: "",
+  });
+
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -66,6 +65,7 @@ const FollowScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const userId = route.params.userId;
+  const currentUserId = route.params.currentUserId;
 
   const getUserAvatar = async (avatarId: string) => {
     try {
@@ -94,20 +94,20 @@ const FollowScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
-  const getFollowing = async (followingUsernames: string[]) => {
+  const getFollowing = async (following: string[]) => {
     try {
       const fetchedUsers = await Promise.all(
-        followingUsernames.map(async (username) => {
+        following.map(async (userId) => {
           const response = await fetch(
-            `http://${SERVERIP}:${SERVERPORT}/api/user/username/${username}`
+            `http://${SERVERIP}:${SERVERPORT}/api/user/${userId}`
           );
-  
+
           if (!response.ok) {
             throw new Error(`Error fetching user: ${response.statusText}`);
           }
-  
+
           const user = await response.json();
-  
+
           return {
             id: user._id,
             userName: user.userName,
@@ -115,7 +115,7 @@ const FollowScreen: React.FC<Props> = ({ navigation, route }) => {
           };
         })
       );
-  
+
       setUser((prevUser) => ({
         ...prevUser,
         following: fetchedUsers,
@@ -125,7 +125,7 @@ const FollowScreen: React.FC<Props> = ({ navigation, route }) => {
       console.error("Failed to fetch following:", error);
     }
   };
-  
+
   const getUser = async (userId: string) => {
     setLoading(true);
     try {
@@ -167,56 +167,39 @@ const FollowScreen: React.FC<Props> = ({ navigation, route }) => {
       {/* Header */}
 
       <View style={styles.header}>
-
         <Image
           source={{
             uri: user.userAvatarUrl,
           }}
           style={styles.avatar}
         />
-        <TouchableOpacity
-            style={styles.header}
-            onPress={() => navigation.navigate("Profile", { userId })}
-          >
-            <Text style = {styles.followCount}>
-              {"< Back to Profile"}
-            </Text>
-        </TouchableOpacity>
-        <Text style={styles.username}>
-          {user.userName} 
-        </Text>
-
-
+        <Text style={styles.username}>{user.userName}</Text>
       </View>
 
       <View style={styles.header}>
-
-        <Text style={styles.username}>
-          {"Following:"} 
-        </Text>
-
-
+        <Text style={styles.username}>{"Following:"}</Text>
       </View>
-
 
       {/* Following List */}
       <FlatList
-      data={user.following}
-      keyExtractor={(item) => item.id}
-      renderItem={({ item }) => (
-          <View style={styles.followingContainer}>
-          <Image
-              source={{ uri: item.avatarUrl }}
-              style={styles.followingAvatar}
-          />
-          <Text style={styles.followingUsername}>{item.userName}</Text>
-          </View>
-      )}
-      style={styles.list}
-      contentContainerStyle={styles.listContent}
+        data={user.following}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.followingContainer}
+            key={item.id}
+            onPress={() =>
+              navigation.navigate("OtherUserProfile", {
+                otherUserId: item.id,
+                userId: currentUserId,
+              })
+            }
+          >
+            <Text style={styles.followingUsername}>{item.userName}</Text>
+          </TouchableOpacity>
+        )}
+        style={styles.list}
+        contentContainerStyle={styles.listContent}
       />
-
-
     </View>
   );
 };
@@ -364,7 +347,6 @@ const styles = StyleSheet.create({
   listContent: {
     padding: 10,
   },
-  
 });
 
 export default FollowScreen;

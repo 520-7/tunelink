@@ -94,30 +94,28 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
           style={styles.iconButton}
           onPress={() => navigation.navigate("Feed", { userId })}
         >
-          <Ionicons name="musical-notes" size={30} color="#A8EB12" />
+          <Ionicons name="musical-notes" size={35} color="#A8EB12" />
         </TouchableOpacity>
-
 
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate("Search", { userId })}
         >
-          <Ionicons name="search-outline" size={30} color="#A8EB12" />
+          <Ionicons name="search-outline" size={35} color="#A8EB12" />
         </TouchableOpacity>
-
 
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => navigation.navigate("MakePost", { userId })}
         >
-          <Ionicons name="add-circle-outline" size={50} color="#A8EB12" />
+          <Ionicons name="add-circle-outline" size={35} color="#A8EB12" />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => navigation.navigate("Profile", { userId })}
         >
-          <Ionicons name="person-circle-outline" size={50} color="#fff" />
+          <Ionicons name="person-circle-outline" size={35} color="#fff" />
         </TouchableOpacity>
       </View>
     </View>
@@ -167,12 +165,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   iconButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   addButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   profilePic: {
     width: 50,
