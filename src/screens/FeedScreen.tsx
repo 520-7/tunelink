@@ -182,58 +182,60 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await fetch(
-          `http://${SERVERIP}:${SERVERPORT}/api/feed/get_feed/${userId}`
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new TypeError("Response was not JSON");
-        }
-        const data = await response.json();
-        console.log("Posts:", data);
-        const feedPosts = data.feed || [];
-
-        // Fetch user data for each post
-        const postsWithUsers = await Promise.all(
-          feedPosts.map(async (post: Post) => {
-            try {
-              const userResponse = await fetch(
-                `http://${SERVERIP}:${SERVERPORT}/api/user/${post.ownerUser}`
-              );
-              if (userResponse.ok) {
-                const userData = await userResponse.json();
-                // console.log("User data:", userData);
-                return { ...post, user: userData };
-              }
-              return post;
-            } catch (error) {
-              console.error("Error fetching user data:", error);
-              return post;
-            }
-          })
-        );
-
-        setPosts(postsWithUsers);
-        if (postsWithUsers.length > 0) {
-          if (postsWithUsers[0].albumCoverUrl) {
-            setBlurredImage(postsWithUsers[0].albumCoverUrl);
-          }
-          if (postsWithUsers[0].audioUrl) {
-            playSound(postsWithUsers[0].audioUrl);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching posts:", error);
-        setPosts([]);
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch(
+        `http://${SERVERIP}:${SERVERPORT}/api/feed/get_feed/${userId}`
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new TypeError("Response was not JSON");
+      }
+      const data = await response.json();
+      // console.log("Posts:", data);
+      const feedPosts = data.feed || [];
 
+      // Fetch user data for each post
+      const postsWithUsers = await Promise.all(
+        feedPosts.map(async (post: Post) => {
+          try {
+            const userResponse = await fetch(
+              `http://${SERVERIP}:${SERVERPORT}/api/user/${post.ownerUser}`
+            );
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+              // console.log("User data:", userData);
+              return { ...post, user: userData };
+            }
+            return post;
+          } catch (error) {
+            console.error("Error fetching user data:", error);
+            return post;
+          }
+        })
+      );
+
+      setPosts(postsWithUsers);
+      setCurrentIndex(0);
+      setLikedPosts({});
+      if (postsWithUsers.length > 0) {
+        if (postsWithUsers[0].albumCoverUrl) {
+          setBlurredImage(postsWithUsers[0].albumCoverUrl);
+        }
+        if (postsWithUsers[0].audioUrl) {
+          playSound(postsWithUsers[0].audioUrl);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+      setPosts([]);
+    }
+  };
+
+  useEffect(() => {
     fetchPosts();
   }, [userId]);
 
@@ -251,6 +253,9 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
       if (nextPost.audioUrl) {
         playSound(nextPost.audioUrl);
       }
+    } else {
+      console.log("Fetching new posts");
+      fetchPosts();
     }
   };
 
@@ -571,7 +576,7 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
           <TouchableOpacity
             style={[styles.navButton, { right: 20 }]}
             onPress={goToNextPost}
-            disabled={currentIndex === posts.length - 1}
+            // disabled={currentIndex === posts.length - 1}
           >
             <Ionicons
               name="chevron-forward"
