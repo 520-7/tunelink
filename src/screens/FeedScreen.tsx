@@ -208,7 +208,7 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
               );
               if (userResponse.ok) {
                 const userData = await userResponse.json();
-                console.log("User data:", userData);
+                // console.log("User data:", userData);
                 return { ...post, user: userData };
               }
               return post;
@@ -278,7 +278,55 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
     }));
   };
 
-  const toggleLike = (postId: string) => {
+  const toggleLike = async (postId: string) => {
+    if (!likedPosts[postId]) {
+      posts[currentIndex].likesCount++;
+      await fetch(`http://${SERVERIP}:${SERVERPORT}/api/post/${postId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ likesCount: posts[currentIndex].likesCount }),
+      });
+
+      const updatedTotalLikeCount = posts[currentIndex].user?.totalLikeCount;
+      if (updatedTotalLikeCount) {
+        await fetch(`http://${SERVERIP}:${SERVERPORT}/api/user/${userId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            totalLikeCount: updatedTotalLikeCount + 1,
+          }),
+        });
+      }
+    } else {
+      posts[currentIndex].likesCount--;
+      await fetch(`http://${SERVERIP}:${SERVERPORT}/api/post/${postId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          likesCount: posts[currentIndex].likesCount,
+        }),
+      });
+
+      const updatedTotalLikeCount = posts[currentIndex].user?.totalLikeCount;
+      if (updatedTotalLikeCount) {
+        await fetch(`http://${SERVERIP}:${SERVERPORT}/api/user/${userId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            totalLikeCount: updatedTotalLikeCount - 1,
+          }),
+        });
+      }
+    }
+
     setLikedPosts((prev) => ({
       ...prev,
       [postId]: !prev[postId],
@@ -313,7 +361,7 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
     return (
       <View style={styles.card}>
         <View style={styles.cardContent}>
-          <View style={styles.postContainer} gap={10}>
+          <View style={styles.postContainer}>
             {/* User Info Row */}
             <View style={styles.userInfoRow}>
               <View style={styles.leftUserInfo}>
@@ -342,9 +390,9 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
               </View>
 
               <View style={styles.rightUserInfo}>
-                <TouchableOpacity style={styles.followButton}>
+                {/* <TouchableOpacity style={styles.followButton}>
                   <Text style={styles.followButtonText}>Follow</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 <Text style={styles.timestamp}>
                   {getTimeAgo(post.timestamp)}
                 </Text>
@@ -469,15 +517,16 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   return (
-    <ImageBackground
-      source={
-        blurredImage ? { uri: getAlbumCoverUrl(blurredImage) } : undefined
-      }
-      style={styles.background}
-      blurRadius={20}
-    >
-      {/* Top bar */}
-      <View style={styles.topBar}>
+    <View style={styles.container}>
+      <ImageBackground
+        source={
+          blurredImage ? { uri: getAlbumCoverUrl(blurredImage) } : undefined
+        }
+        style={styles.background}
+        blurRadius={20}
+      >
+        {/* Top bar */}
+        {/* <View style={styles.topBar}>
         <Image
           source={require("../../assets/app-logo.png")}
           style={styles.appLogo}
@@ -501,41 +550,76 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
         >
           <Ionicons name="person-circle-outline" size={40} color="#fff" />
         </TouchableOpacity>
-      </View>
+      </View> */}
 
-      {/* Posts Display */}
-      <View style={styles.carousel}>
+        {/* Posts Display */}
+        <View style={styles.carousel}>
+          <TouchableOpacity
+            style={[styles.navButton, { left: 20 }]}
+            onPress={goToPreviousPost}
+            disabled={currentIndex === 0}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={30}
+              color={currentIndex === 0 ? "#666" : "#fff"}
+            />
+          </TouchableOpacity>
+
+          {posts.length > 0 && renderPost(posts[currentIndex])}
+
+          <TouchableOpacity
+            style={[styles.navButton, { right: 20 }]}
+            onPress={goToNextPost}
+            disabled={currentIndex === posts.length - 1}
+          >
+            <Ionicons
+              name="chevron-forward"
+              size={30}
+              color={currentIndex === posts.length - 1 ? "#666" : "#fff"}
+            />
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
+      {/* Footer */}
+      <View style={styles.footer}>
         <TouchableOpacity
-          style={[styles.navButton, { left: 20 }]}
-          onPress={goToPreviousPost}
-          disabled={currentIndex === 0}
+          style={styles.iconButton}
+          onPress={() => navigation.navigate("Feed", { userId })}
         >
-          <Ionicons
-            name="chevron-back"
-            size={30}
-            color={currentIndex === 0 ? "#666" : "#fff"}
-          />
+          <Ionicons name="musical-notes" size={35} color="#A8EB12" />
         </TouchableOpacity>
 
-        {posts.length > 0 && renderPost(posts[currentIndex])}
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => navigation.navigate("Search", { userId })}
+        >
+          <Ionicons name="search-outline" size={35} color="#A8EB12" />
+        </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.navButton, { right: 20 }]}
-          onPress={goToNextPost}
-          disabled={currentIndex === posts.length - 1}
+          style={styles.iconButton}
+          onPress={() => navigation.navigate("MakePost", { userId })}
         >
-          <Ionicons
-            name="chevron-forward"
-            size={30}
-            color={currentIndex === posts.length - 1 ? "#666" : "#fff"}
-          />
+          <Ionicons name="add-circle-outline" size={35} color="#A8EB12" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => navigation.navigate("Profile", { userId })}
+        >
+          <Ionicons name="person-circle-outline" size={35} color="#fff" />
         </TouchableOpacity>
       </View>
-    </ImageBackground>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
   appLogo: {
     width: 40,
     height: 40,
@@ -564,6 +648,20 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     gap: 8,
     marginTop: 10,
+  },
+  footer: {
+    height: 80,
+    backgroundColor: "#000000",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderTopColor: "#4D4D4D",
+    borderTopWidth: 1,
+    paddingHorizontal: 40,
+  },
+  iconButton: {
+    alignItems: "center",
+    justifyContent: "center",
   },
   outLinkContent: {
     flexDirection: "row",
@@ -692,7 +790,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: -40,
     left: 0,
-    padding: 10,
+    paddingVertical: 10,
+    paddingLeft: 10,
   },
   postDescription: {
     color: "#ddd",
