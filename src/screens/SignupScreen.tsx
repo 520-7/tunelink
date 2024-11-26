@@ -70,6 +70,10 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
         } as any);
       }
 
+      console.log(formData);
+
+
+
       const responseData = await signup(formData);
       if (responseData && responseData.userId) {
         console.log(responseData);
