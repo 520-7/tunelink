@@ -29,12 +29,18 @@ const handleError = (error: any, context: string) => {
   Alert.alert("Error", `Something went wrong: ${error.message}`);
 };
 
-interface User {
+type User = {
   _id: string;
+  userAvatarUrl: string;
   userName: string;
   profileName: string;
-  userAvatarUrl: string;
-}
+  followerCount: number;
+  following: string[];
+  totalLikeCount: number;
+  profileDescription: string;
+  genres: string[];
+  ownedPosts: string[];
+};
 
 interface Props {
   navigation: SearchScreenNavigationProp;

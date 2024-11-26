@@ -61,6 +61,7 @@ type OutLink = {
 };
 
 type User = {
+  _id: string;
   userAvatarUrl: string;
   userName: string;
   profileName: string;
@@ -150,14 +151,14 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
         soundRef.current = sound;
         setIsPlaying(true);
         sound.setOnPlaybackStatusUpdate((status) => {
-          if (
-            status &&
-            "positionMillis" in status &&
-            "durationMillis" in status
-          ) {
+          if (status && "positionMillis" in status) {
             setAudioPosition(status.positionMillis / 1000);
+          }
+        
+          if (status && "durationMillis" in status && status.durationMillis !== undefined) {
             setAudioDuration(status.durationMillis / 1000);
           }
+        
           if ("didJustFinish" in status && status.didJustFinish) {
             sound.unloadAsync();
             soundRef.current = null;
