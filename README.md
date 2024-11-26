@@ -58,7 +58,7 @@ Aaryan Nair
 
 Hanna Jiang
 
-Ozel Yilamzel
+Ozel Yilmazel
 
 Rachel Lahav
 
