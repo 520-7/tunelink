@@ -8,6 +8,7 @@ import {
   Text,
   ScrollView,
   Linking,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -45,10 +46,35 @@ const SinglePostScreen: React.FC<Props> = ({ navigation, route }) => {
   });
 
   const [albumCover, setAlbumCover] = useState<any>(null);
-  const [audio, setAudio] = useState<any>(null);
+  const [audio, setAudio] = useState<string | any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
   const soundRef = useRef<Audio.Sound | null>(null);
+
+  const getAudioUrl = async (audioId: string) => {
+    return `http://${SERVERIP}:${SERVERPORT}/api/files/audio/${audioId}`;
+  };
+
+  const getAlbumCoverUrl = async (albumCoverId: string) => {
+    return `http://${SERVERIP}:${SERVERPORT}/api/files/albumCover/${albumCoverId}`;
+  };
+
+  useEffect(() => {
+    const setupAudio = async () => {
+      try {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: true,
+          shouldDuckAndroid: true,
+        });
+      } catch (error) {
+        console.error("Error setting up audio:", error);
+      }
+    };
+
+    setupAudio();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("blur", () => {
@@ -125,7 +151,7 @@ const SinglePostScreen: React.FC<Props> = ({ navigation, route }) => {
       }
 
       const postData = await postResponse.json();
-      console.log(JSON.stringify(postData));
+      // console.log(JSON.stringify(postData));
 
       const sanitizedPostData = {
         ...postData,
@@ -135,39 +161,45 @@ const SinglePostScreen: React.FC<Props> = ({ navigation, route }) => {
       setPost(sanitizedPostData);
 
       if (postData.audioUrl !== "") {
-        const audioResponse = await fetch(
-          `http://${SERVERIP}:${SERVERPORT}/api/files/audio/${postData.audioUrl}`
-        );
-        if (!audioResponse.ok) {
-          throw new Error(`Error fetching audio: ${audioResponse.status}`);
-        }
+        // const audioResponse = await fetch(
+        //   `http://${SERVERIP}:${SERVERPORT}/api/files/audio/${postData.audioUrl}`
+        // );
+        // if (!audioResponse.ok) {
+        //   throw new Error(`Error fetching audio: ${audioResponse.status}`);
+        // }
 
-        const audioBlob = await audioResponse.blob();
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64data = reader.result as string;
-          setAudio(base64data);
-        };
-        reader.readAsDataURL(audioBlob);
+        // const audioBlob = await audioResponse.blob();
+        // const reader = new FileReader();
+        // reader.onloadend = () => {
+        //   const base64data = reader.result as string;
+        //   setAudio(base64data);
+        // };
+        // reader.readAsDataURL(audioBlob);
+
+        const audioUrl = await getAudioUrl(postData.audioUrl);
+        setAudio(audioUrl);
       }
 
       if (postData.albumCoverUrl !== "") {
-        const albumCoverResponse = await fetch(
-          `http://${SERVERIP}:${SERVERPORT}/api/files/albumCover/${postData.albumCoverUrl}`
-        );
-        if (!albumCoverResponse.ok) {
-          throw new Error(
-            `Error fetching album cover: ${albumCoverResponse.status}`
-          );
-        }
+        // const albumCoverResponse = await fetch(
+        //   `http://${SERVERIP}:${SERVERPORT}/api/files/albumCover/${postData.albumCoverUrl}`
+        // );
+        // if (!albumCoverResponse.ok) {
+        //   throw new Error(
+        //     `Error fetching album cover: ${albumCoverResponse.status}`
+        //   );
+        // }
 
-        const albumCoverBlob = await albumCoverResponse.blob();
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64data = reader.result as string;
-          setAlbumCover(base64data);
-        };
-        reader.readAsDataURL(albumCoverBlob);
+        // const albumCoverBlob = await albumCoverResponse.blob();
+        // const reader = new FileReader();
+        // reader.onloadend = () => {
+        //   const base64data = reader.result as string;
+        //   setAlbumCover(base64data);
+        // };
+        // reader.readAsDataURL(albumCoverBlob);
+
+        const albumCoverUrl = await getAlbumCoverUrl(postData.albumCoverUrl);
+        setAlbumCover(albumCoverUrl);
       }
       setIsLoading(false);
     } catch (error) {
@@ -242,27 +274,32 @@ const SinglePostScreen: React.FC<Props> = ({ navigation, route }) => {
             <TouchableOpacity
               style={styles.audioButton}
               onPress={async () => {
+                console.log(audio);
                 try {
                   if (soundRef.current) {
-                    if (isPlaying) {
-                      // Check if the pauseAsync method is available before calling it
-                      if (soundRef.current.pauseAsync) {
-                        await soundRef.current.pauseAsync();
-                        setIsPlaying(false);
-                      }
-                    } else {
-                      // Check if the playAsync method is available before calling it
-                      if (soundRef.current.playAsync) {
-                        await soundRef.current.playAsync();
-                        setIsPlaying(true);
-                      }
+                    if (!isPlaying) {
+                      await soundRef.current.playAsync();
+                      setIsPlaying(true);
                     }
                   } else {
+                    // if (soundRef.current) {
+                    //   await soundRef.current.unloadAsync();
+                    //   soundRef.current = null;
+                    // }
+
                     const { sound } = await Audio.Sound.createAsync(
                       { uri: audio },
-                      { shouldPlay: true }
+                      {
+                        shouldPlay: true,
+                        progressUpdateIntervalMillis: 1000,
+                        positionMillis: 0,
+                        volume: 1.0,
+                        rate: 1.0,
+                        isMuted: false,
+                      }
                     );
                     soundRef.current = sound;
+                    console.log(soundRef.current);
                     setIsPlaying(true);
                     sound.setOnPlaybackStatusUpdate((status) => {
                       if ("didJustFinish" in status && status.didJustFinish) {
@@ -274,6 +311,10 @@ const SinglePostScreen: React.FC<Props> = ({ navigation, route }) => {
                   }
                 } catch (error) {
                   console.error("Error playing audio:", error);
+                  Alert.alert(
+                    "Audio Error",
+                    "There was an error playing the audio. Please try again."
+                  );
                 }
               }}
             >
