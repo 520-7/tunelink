@@ -1,5 +1,7 @@
 // src/screens/EditProfile.tsx
 import React, { useEffect, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+
 import {
   View,
   StyleSheet,
@@ -112,7 +114,7 @@ const EditProfileScreen: React.FC<Props> = ({ navigation, route }) => {
         `http://${SERVERIP}:${SERVERPORT}/api/user/${userId}`, 
         formData
       );
-      
+
       const resposeData = updateUser.data
       console.log("Profile updated successfully");
       navigation.navigate("Profile", { userId });
@@ -133,6 +135,11 @@ const EditProfileScreen: React.FC<Props> = ({ navigation, route }) => {
 
   return (
     <ScrollView style={styles.container}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
+        <Ionicons name="arrow-back" size={24} color="#A8EB12" />
+      </TouchableOpacity>
+
+
       <View style={styles.formContainer}>
         <View style={styles.inputContainer}>
           <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
@@ -229,6 +236,13 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingBottom: 60,
   },
+  iconButton: {
+    padding: 10,
+    marginRight: 15, 
+    marginTop: 50,
+    color: "#A8EB12"
+  },
+
   imageContainer: {
     alignSelf: "center",
     marginBottom: 40,

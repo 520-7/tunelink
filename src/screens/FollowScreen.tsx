@@ -167,6 +167,10 @@ const FollowScreen: React.FC<Props> = ({ navigation, route }) => {
       {/* Header */}
 
       <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
+          <Ionicons name="arrow-back" size={24} color="#A8EB12" />
+        </TouchableOpacity>
+
         <Image
           source={{
             uri: user.userAvatarUrl,
@@ -210,8 +214,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
   },
   header: {
+    flexDirection: "row", // Align items horizontally
     alignItems: "center",
-    marginTop: 50,
+    marginTop: 70,
+    paddingHorizontal: 20, // Space between elements
   },
   avatar: {
     width: 120,
@@ -219,7 +225,7 @@ const styles = StyleSheet.create({
     borderRadius: 60,
   },
   username: {
-    color: "#fff",
+    color: "#A8EB12",
     fontSize: 24,
     fontWeight: "bold",
     marginTop: 10,
@@ -309,6 +315,8 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     padding: 10,
+    marginRight: 15, 
+    color: "#A8EB12"
   },
   addButton: {
     position: "absolute",
