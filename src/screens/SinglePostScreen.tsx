@@ -223,6 +223,11 @@ const SinglePostScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
       ) : (
         <>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
+            <Ionicons name="arrow-back" size={24} color="#A8EB12" />
+          </TouchableOpacity>
+
+
           {/* Album Cover */}
           {albumCover ? (
             <Image source={{ uri: albumCover }} style={styles.albumCover} />
@@ -369,6 +374,12 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
   },
+  iconButton: {
+    padding: 10,
+    marginTop: 50,
+    color: "#A8EB12"
+  },
+
   albumCover: {
     width: Dimensions.get("window").width * 0.9,
     height: 300,

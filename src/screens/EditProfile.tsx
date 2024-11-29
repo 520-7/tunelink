@@ -1,5 +1,7 @@
 // src/screens/EditProfile.tsx
 import React, { useEffect, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+
 import {
   View,
   StyleSheet,
@@ -13,6 +15,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../navigation/RootStackParamList";
 import * as ImagePicker from "expo-image-picker";
 import { RouteProp } from "@react-navigation/native";
+import axios from "axios";
 
 type EditProfileScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -33,6 +36,7 @@ const EditProfileScreen: React.FC<Props> = ({ navigation, route }) => {
   const [profilename, setProfileName] = useState<string>("");
   const [profileDescription, setProfileDescription] = useState<string>("");
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [image, setImage] = useState<any>(null);
 
   const genres = [
     "Pop",
@@ -51,6 +55,22 @@ const EditProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     "Techno",
     "Disco",
   ];
+
+
+    
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: "images",
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0]);
+    }
+  };
+
 
   useEffect(() => {
     const updateValues = async () => {
@@ -72,46 +92,37 @@ const EditProfileScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const handleUpdateProfile = async () => {
     console.log("Updating profile");
-    const existingUser = await fetch(
-      `http://${SERVERIP}:${SERVERPORT}/api/user/${userId}`
-    );
-    if (!existingUser.ok) {
-      throw new Error(
-        `Error fetching user ${userId}: ${existingUser.statusText}`
-      );
+  
+    const formData = new FormData();
+    formData.append("profileName", profilename);
+    formData.append("profileDescription", profileDescription);
+    formData.append("genres", JSON.stringify(selectedGenres)); 
+  
+    if (image) {
+      const uri = image.uri;
+      let type = uri.substring(uri.lastIndexOf(".") + 1);
+      const fileName = uri.split("/").pop();
+      formData.append("userAvatar", {
+        uri,
+        name: fileName || "userAvatar",
+        type: `image/${type}`,
+      } as any);
     }
 
-    console.log(selectedGenres);
-    console.log(profileDescription);
-    console.log(profilename);
-    const existingUserJson = await existingUser.json();
-    const updatedUser = {
-      ...existingUserJson,
-      genres: selectedGenres,
-      profileName: profilename,
-      profileDescription: profileDescription,
-    };
-
-    console.log(updatedUser);
-
-    const updateUser = await fetch(
-      `http://${SERVERIP}:${SERVERPORT}/api/user/${userId}`,
-      {
-        method: "PUT",
-        body: JSON.stringify(updatedUser),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    if (!updateUser.ok) {
-      throw new Error(
-        `Error updating user ${userId}: ${updateUser.statusText}`
+    try {
+      const updateUser = await axios.put(
+        `http://${SERVERIP}:${SERVERPORT}/api/user/${userId}`, 
+        formData
       );
+
+      const resposeData = updateUser.data
+      console.log("Profile updated successfully");
+      navigation.navigate("Profile", { userId });
+    } catch (error) {
+      console.error("Error updating profile:", error);
     }
-    navigation.navigate("Profile", { userId });
   };
-
+    
   const toggleGenre = (genre: string) => {
     if (selectedGenres.includes(genre)) {
       setSelectedGenres(selectedGenres.filter((item) => item !== genre));
@@ -124,8 +135,21 @@ const EditProfileScreen: React.FC<Props> = ({ navigation, route }) => {
 
   return (
     <ScrollView style={styles.container}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
+        <Ionicons name="arrow-back" size={24} color="#A8EB12" />
+      </TouchableOpacity>
+
+
       <View style={styles.formContainer}>
         <View style={styles.inputContainer}>
+          <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
+            {image ? (
+              <Image source={{ uri: image.uri }} style={styles.image} />
+            ) : (
+              <Text style={styles.imagePlaceholder}>Select Profile Image</Text>
+            )}
+          </TouchableOpacity>
+
           <TextInput
             label="Profile Name"
             textColor="#FFFFFF"
@@ -212,6 +236,13 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingBottom: 60,
   },
+  iconButton: {
+    padding: 10,
+    marginRight: 15, 
+    marginTop: 50,
+    color: "#A8EB12"
+  },
+
   imageContainer: {
     alignSelf: "center",
     marginBottom: 40,

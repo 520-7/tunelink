@@ -55,7 +55,7 @@ const OnboardingScreen: React.FC<Props> = ({ navigation, route }) => {
   const handleContinue = async () => {
     try {
       const updateUserData = {
-        genres: selectedGenres,
+        genres: JSON.stringify(selectedGenres),
       };
 
       const response = await fetch(
