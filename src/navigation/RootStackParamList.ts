@@ -34,6 +34,6 @@ export type RootStackParamList = {
     }
     OtherUserProfile: {
       userId: string;
-      otherUserId: string | undefined;
+      otherUserId: string;
     }
 };
