@@ -15,7 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../navigation/RootStackParamList";
-import { Audio } from "expo-av";
+import { Audio, AVPlaybackStatus } from 'expo-av';
 import Slider from "@react-native-community/slider";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -132,13 +132,12 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
   const playSound = async (audioUrl: string) => {
     try {
       if (soundRef.current) {
-        if (isPlaying) {
-          if (soundRef.current.pauseAsync) {
+        const status = await soundRef.current.getStatusAsync();
+        if (status.isLoaded) {
+          if (status.isPlaying) {
             await soundRef.current.pauseAsync();
             setIsPlaying(false);
-          }
-        } else {
-          if (soundRef.current.playAsync) {
+          } else {
             await soundRef.current.playAsync();
             setIsPlaying(true);
           }
@@ -148,38 +147,58 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
           { uri: getAudioUrl(audioUrl) },
           { shouldPlay: true }
         );
+        
+        // Get initial status to set duration immediately
+        const status = await sound.getStatusAsync();
+        if (status.isLoaded && status.durationMillis) {
+          setAudioDuration(status.durationMillis / 1000);
+        }
+
+        // Set up status update callback after getting initial duration
+        sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
+        
         soundRef.current = sound;
         setIsPlaying(true);
-        sound.setOnPlaybackStatusUpdate((status) => {
-          if (status && "positionMillis" in status) {
-            setAudioPosition(status.positionMillis / 1000);
-          }
-        
-          if (status && "durationMillis" in status && status.durationMillis !== undefined) {
-            setAudioDuration(status.durationMillis / 1000);
-          }
-        
-          if ("didJustFinish" in status && status.didJustFinish) {
-            sound.unloadAsync();
-            soundRef.current = null;
-            setIsPlaying(false);
-            setAudioPosition(0);
-          }
-        });
       }
     } catch (error) {
       console.error("Error playing audio:", error);
     }
   };
 
-  const pauseSound = async () => {
+  const onPlaybackStatusUpdate = async (status: AVPlaybackStatus) => {
+    if (!status.isLoaded) return;
+    
+    if (status.isPlaying) {
+      setIsPlaying(true);
+    } else {
+      setIsPlaying(false);
+    }
+
+    if (status.positionMillis !== undefined) {
+      setAudioPosition(status.positionMillis / 1000);
+    }
+
+    if (status.durationMillis !== undefined) {
+      setAudioDuration(status.durationMillis / 1000);
+    }
+
+    if (status.didJustFinish) {
+      setIsPlaying(false);
+      setAudioPosition(0);
+      if (soundRef.current) {
+        await soundRef.current.playFromPositionAsync(0);
+      }
+    }
+  };
+
+  const seekAudio = async (value: number) => {
     try {
       if (soundRef.current) {
-        await soundRef.current.pauseAsync();
-        setIsPlaying(false);
+        await soundRef.current.playFromPositionAsync(value * 1000);
+        setAudioPosition(value);
       }
     } catch (error) {
-      console.error("Error pausing sound:", error);
+      console.error("Error seeking audio:", error);
     }
   };
 
@@ -242,17 +261,28 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const goToNextPost = async () => {
     if (currentIndex < posts.length - 1) {
+      // Reset audio state
       if (soundRef.current) {
         await soundRef.current.unloadAsync();
-        setIsPlaying(false);
+        soundRef.current = null;
       }
+      setIsPlaying(false);
+      setAudioPosition(0);
+      setAudioDuration(0);
+      
+      // Move to next post
       setCurrentIndex(currentIndex + 1);
       const nextPost = posts[currentIndex + 1];
+      
       if (nextPost.albumCoverUrl) {
         setBlurredImage(nextPost.albumCoverUrl);
       }
+      
+      // Play new audio after a short delay to ensure proper cleanup
       if (nextPost.audioUrl) {
-        playSound(nextPost.audioUrl);
+        setTimeout(() => {
+          playSound(nextPost.audioUrl!);
+        }, 100);
       }
     } else {
       console.log("Fetching new posts");
@@ -262,17 +292,28 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const goToPreviousPost = async () => {
     if (currentIndex > 0) {
+      // Reset audio state
       if (soundRef.current) {
         await soundRef.current.unloadAsync();
-        setIsPlaying(false);
+        soundRef.current = null;
       }
+      setIsPlaying(false);
+      setAudioPosition(0);
+      setAudioDuration(0);
+      
+      // Move to previous post
       setCurrentIndex(currentIndex - 1);
       const prevPost = posts[currentIndex - 1];
+      
       if (prevPost.albumCoverUrl) {
         setBlurredImage(prevPost.albumCoverUrl);
       }
+      
+      // Play new audio after a short delay to ensure proper cleanup
       if (prevPost.audioUrl) {
-        playSound(prevPost.audioUrl);
+        setTimeout(() => {
+          playSound(prevPost.audioUrl!);
+        }, 100);
       }
     }
   };
@@ -340,9 +381,17 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const formatTime = (seconds: number) => {
+    if (isNaN(seconds)) return "0:00";
+    
+    // Round to nearest second to avoid decimal places
+    seconds = Math.round(seconds);
+    
+    // Extract minutes and seconds
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+    
+    // Format with leading zero only for seconds
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
   const renderPost = (post: Post) => {
@@ -405,13 +454,6 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
               </View>
             </View>
 
-            {/* Likes Count Row */}
-            <View style={styles.likesRow}>
-              <Text style={styles.likesCount}>
-                {post.likesCount ?? 0} likes
-              </Text>
-            </View>
-
             {/* Album Art Section */}
             <View style={styles.albumSection}>
               {post.albumCoverUrl && (
@@ -422,28 +464,17 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
                   style={styles.albumArt}
                 />
               )}
-
-              {/* Heart Button */}
-              <TouchableOpacity
-                style={styles.heartButton}
-                onPress={() => toggleLike(post._id)}
-              >
-                <Ionicons
-                  name={isLiked ? "heart" : "heart-outline"}
-                  size={28}
-                  color={isLiked ? "#A8EB12" : "#fff"}
-                />
-              </TouchableOpacity>
             </View>
 
             {/* Audio Controls */}
             {post.audioUrl && (
               <View style={styles.audioControls}>
+                {/* Play/Pause button commented out
                 <TouchableOpacity
                   style={styles.playPauseButton}
                   onPress={() => {
                     if (post.audioUrl) {
-                      isPlaying ? pauseSound() : playSound(post.audioUrl);
+                      playSound(post.audioUrl);
                     }
                   }}
                 >
@@ -453,25 +484,9 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
                     color="#A8EB12"
                   />
                 </TouchableOpacity>
+                */}
                 <Text style={styles.audioTime}>
                   {formatTime(audioPosition)}
-                </Text>
-                <Slider
-                  style={styles.audioSlider}
-                  minimumValue={0}
-                  maximumValue={audioDuration}
-                  value={audioPosition}
-                  minimumTrackTintColor="#A8EB12"
-                  maximumTrackTintColor="#666"
-                  thumbTintColor="#A8EB12"
-                  onSlidingComplete={async (value) => {
-                    if (soundRef.current) {
-                      await soundRef.current.setPositionAsync(value * 1000);
-                    }
-                  }}
-                />
-                <Text style={styles.audioTime}>
-                  {formatTime(audioDuration)}
                 </Text>
               </View>
             )}
@@ -498,24 +513,24 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
               </View>
             )}
 
-            {/* Does not work for now looks like a bug */}
-            {/* External Links Section */}
-            {/* {parsedOutLinks.length > 0 && (
-              <View style={styles.outLinksContainer}>
-                {parsedOutLinks.map((link, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.outLinkButton}
-                    onPress={() => Linking.openURL(link.url)}
-                  >
-                    <View style={styles.outLinkContent}>
-                      <Ionicons name="link" size={24} color="#fff" />
-                      <Text style={styles.outLinkText}>{link.source}</Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
+            {/* Likes Row and Heart Button */}
+            <View style={styles.likesContainer}>
+              <View style={styles.likesWrapper}>
+                <TouchableOpacity
+                  style={styles.heartButton}
+                  onPress={() => toggleLike(post._id)}
+                >
+                  <Ionicons
+                    name={isLiked ? "heart" : "heart-outline"}
+                    size={28}
+                    color={isLiked ? "#A8EB12" : "#fff"}
+                  />
+                </TouchableOpacity>
+                <Text style={styles.likesCount}>
+                  {post.likesCount ?? 0} likes
+                </Text>
               </View>
-            )} */}
+            </View>
           </View>
         </View>
       </View>
@@ -774,18 +789,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
   },
-  likesRow: {
-    marginBottom: 15,
-  },
-  likesCount: {
-    color: "#A8EB12",
-    fontSize: 16,
-    fontWeight: "600",
-  },
   albumSection: {
     width: "100%",
     aspectRatio: 1,
-    marginBottom: 10,
+    marginBottom: 15,
   },
   albumArt: {
     width: "100%",
@@ -793,17 +800,13 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   heartButton: {
-    position: "absolute",
-    bottom: -40,
-    left: 0,
-    paddingVertical: 10,
-    paddingLeft: 10,
+    marginBottom: 5,
   },
   postDescription: {
     color: "#ddd",
-    fontSize: 14,
-    marginTop: 45,
+    fontSize: 16,
     marginBottom: 10,
+    minHeight: 60,
   },
   seeMoreButton: {
     color: "#A8EB12",
@@ -819,10 +822,11 @@ const styles = StyleSheet.create({
   },
   audioControls: {
     flexDirection: "row",
+    justifyContent: "flex-start",
     alignItems: "center",
     marginTop: 10,
     marginBottom: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
   },
   playPauseButton: {
     marginRight: 10,
@@ -833,7 +837,22 @@ const styles = StyleSheet.create({
   },
   audioTime: {
     color: "#fff",
-    fontSize: 12,
+    fontSize: 14,
+    textAlign: 'left',
+  },
+  likesContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 5,
+    marginBottom: 10,
+  },
+  likesWrapper: {
+    alignItems: 'center',
+  },
+  likesCount: {
+    color: "#A8EB12",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
 
