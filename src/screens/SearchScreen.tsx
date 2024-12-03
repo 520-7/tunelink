@@ -86,7 +86,8 @@ const SearchScreen: React.FC<Props> = ({ navigation, route }) => {
         };
 
         const endpoint = `http://${SERVERIP}:${SERVERPORT}/api/user/search-by-genre/${query}`;
-        const response = await fetch(endpoint);
+        // include options
+        const response = await fetch(endpoint, options);
 
         if (!response.ok) {
           throw new Error(
