@@ -1,124 +1,243 @@
 // src/screens/SignupScreen.tsx
+import React, { useState } from "react";
+import {
+  View,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Text,
+  ScrollView,
+} from "react-native";
+import { TextInput, Button } from "react-native-paper";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../navigation/RootStackParamList";
+import * as ImagePicker from "expo-image-picker";
 
-import React, { useState } from 'react';
-import { View, StyleSheet, Image, TouchableOpacity, Text } from 'react-native';
-import { TextInput, Button } from 'react-native-paper';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/RootStackParamList';
+import { signup } from "../services/authService";
 
-type SignupScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Signup'>;
+type SignupScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "Signup"
+>;
+
+const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
+const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
 
 interface Props {
   navigation: SignupScreenNavigationProp;
 }
 
 const SignupScreen: React.FC<Props> = ({ navigation }) => {
-  const [email, setEmail] = useState<string>('');
-  const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [email, setEmail] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [profilename, setProfileName] = useState<string>("");
+  const [profileDescription, setProfileDescription] = useState<string>("");
+  const [image, setImage] = useState<any>(null);
 
-  const handleSignup = () => {
-    // Add signup logic here
-    navigation.navigate('Onboarding'); // Redirect to Onboarding page after signup
+  const [errorMessage, setErrorMessage] = useState<string>("");
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: "images",
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0]);
+    }
+  };
+
+  const handleSignup = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("userName", username);
+      formData.append("profileName", profilename);
+      formData.append("profileDescription", profileDescription);
+
+      if (image) {
+        const uri = image.uri;
+        let type = uri.substring(uri.lastIndexOf(".") + 1);
+        const fileName = uri.split("/").pop();
+        formData.append("userAvatar", {
+          uri,
+          name: fileName || "userAvatar",
+          type: `image/${type}`,
+        } as any);
+      }
+
+      console.log(formData);
+
+
+
+      const responseData = await signup(formData);
+      if (responseData && responseData.userId) {
+        console.log(responseData);
+        navigation.navigate("Onboarding", { userId: responseData.userId });
+      } else {
+        setErrorMessage("Failed to sign up. Please try again later.");
+      }
+    } catch (error) {
+      setErrorMessage(
+        "Network request failed. Please enter all fields and try again."
+      );
+      console.error("Network request failed:", error);
+    }
   };
 
   return (
+    <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.container}>
-      <View style={styles.logoContainer}>
-        <Image source={require('../../assets/app-logo.png')} style={styles.logo} />
-      </View>
-      
-      <View style={styles.formContainer}>
-        <TextInput
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          mode="outlined"
-          placeholder="Enter your email"
-          style={styles.input}
-          theme={{ colors: { text: '#FFFFFF', placeholder: '#FFFFFF' } }} // Set white text and placeholder
-            textColor='white'
-        />
-        <TextInput
-          label="Username"
-          value={username}
-          onChangeText={setUsername}
-          mode="outlined"
-          placeholder="Enter your username"
-          style={styles.input}
-          theme={{ colors: { text: '#FFFFFF', placeholder: '#FFFFFF' } }} // Set white text and placeholder
-            textColor='white'
-         />
-        <TextInput
-          label="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          mode="outlined"
-          placeholder="Enter your password"
-          style={styles.input}
-          theme={{ colors: { text: '#FFFFFF', placeholder: '#FFFFFF' } }} // Set white text and placeholder
-          textColor='white'
-        />
-
-        <Button mode="contained" onPress={handleSignup} style={styles.signupButton}>
-          Sign Up
-        </Button>
-
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.link}>Already have an account? Log in</Text>
+        {errorMessage ? (
+          <Text style={styles.errorMessage}>{errorMessage}</Text>
+        ) : null}
+        <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
+          {image ? (
+            <Image source={{ uri: image.uri }} style={styles.image} />
+          ) : (
+            <Text style={styles.imagePlaceholder}>Select Profile Image</Text>
+          )}
         </TouchableOpacity>
+
+        <View style={styles.formContainer}>
+          <TextInput
+            label="Email"
+            textColor="#FFFFFF"
+            value={email}
+            onChangeText={setEmail}
+            mode="outlined"
+            placeholder="Enter your email"
+            style={styles.input}
+            theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }}
+          />
+          <TextInput
+            label="Username"
+            textColor="#FFFFFF"
+            value={username}
+            onChangeText={setUsername}
+            mode="outlined"
+            placeholder="Enter your username"
+            style={styles.input}
+            theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }}
+          />
+          <TextInput
+            label="Profile Name"
+            textColor="#FFFFFF"
+            value={profilename}
+            onChangeText={setProfileName}
+            mode="outlined"
+            placeholder="Enter your Profile Name"
+            style={styles.input}
+            theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }}
+          />
+          <TextInput
+            label="Profile Description"
+            textColor="#FFFFFF"
+            value={profileDescription}
+            onChangeText={setProfileDescription}
+            mode="outlined"
+            placeholder="Enter your Profile Description"
+            style={styles.input}
+            theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }}
+          />
+          <TextInput
+            label="Password"
+            textColor="#FFFFFF"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            mode="outlined"
+            placeholder="Enter your password"
+            style={styles.input}
+            theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }}
+          />
+          <Button
+            mode="contained"
+            onPress={handleSignup}
+            style={styles.signupButton}
+            labelStyle={styles.signupButtonText}
+          >
+            Sign Up
+          </Button>
+          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+            <Text style={styles.link}>Already have an account? Log in</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#000000', // Black background
-    paddingTop: 150, // Move the content down further
+    flexGrow: 1,
+    backgroundColor: "#000000",
+    paddingBottom: 50,
+    paddingTop: 50,
   },
   logoContainer: {
-    flex: 0.6, 
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: 0.6,
+    justifyContent: "center",
+    alignItems: "center",
   },
   logo: {
-    width: 200, 
-    height: 200, 
-    resizeMode: 'contain',
+    width: 200,
+    height: 200,
+    resizeMode: "contain",
+  },
+  errorMessage: {
+    color: "red",
+    textAlign: "center",
+    marginTop: 10,
+  },
+  imageContainer: {
+    alignSelf: "center",
+    marginVertical: 20,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    overflow: "hidden",
+    borderWidth: 2,
+    borderColor: "#A8EB12",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 60,
+  },
+  imagePlaceholder: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    textAlign: "center",
   },
   formContainer: {
-    flex: 1.4, 
+    flex: 1.4,
     paddingHorizontal: 16,
-    justifyContent: 'flex-start', 
+    justifyContent: "flex-start",
   },
   input: {
     marginBottom: 16,
-    backgroundColor: '#1a1a1a', // Dark background for inputs
-    color: '#FFFFFF', // White text
+    backgroundColor: "#1a1a1a",
+    color: "#FFFFFF",
   },
   signupButton: {
-    backgroundColor: '#4D4D4D', 
-    marginTop: 20,
+    backgroundColor: "#4D4D4D",
+    marginTop: 10,
+    paddingVertical: 10,
+  },
+  signupButtonText: {
+    color: "#FFFFFF",
   },
   link: {
-    color: '#A8EB12',
-    textAlign: 'center',
+    color: "#A8EB12",
+    textAlign: "center",
     marginTop: 20,
-    },
-    purpleGlow: {
-    position: 'absolute',
-    width: 200,
-    height: 200,
-    backgroundColor: 'rgba(157, 82, 255, 0.6)', // Purple color with transparency
-    borderRadius: 150, // Circle shape
-    shadowColor: '#A8EB12',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 60, // Glow effect
-    zIndex: -1, // Keep it behind the rest of the content
   },
 });
 

@@ -1,2 +1,37 @@
-.expo/
+# Node modules
 node_modules/
+
+# Expo specific
+.expo/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build directories
+/dist/
+/build/
+/ios/build/
+/android/build/
+
+# IDEs and editors
+.vscode/
+.idea/
+
+# Babel config (not typically needed to track)
+.babel.config.js
+
+# TypeScript (if using TypeScript)
+tsconfig.tsbuildinfo
+
+# Miscellaneous
+*.log
+
+# Package lock and other dependency management files
+package-lock.json
+yarn.lock
+
+# OS-specific files
+.DS_Store
+Thumbs.db

@@ -1,161 +1,315 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Image, TouchableOpacity, Text } from 'react-native';
-import { TextInput, Button } from 'react-native-paper';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { launchImageLibrary } from 'react-native-image-picker';
-import { RootStackParamList } from '../navigation/RootStackParamList';
+import React, { useState } from "react";
+import {
+  View,
+  StyleSheet,
+  Image,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+import { TextInput, Button } from "react-native-paper";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../navigation/RootStackParamList";
+import { RouteProp } from "@react-navigation/native";
+import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
 
-type MakePostScreenNavigationProp = StackNavigationProp<RootStackParamList, 'MakePost'>;
+const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
+const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
+
+type MakePostScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "MakePost"
+>;
+type MakePostScreenRouteProp = RouteProp<RootStackParamList, "MakePost">;
+
 interface Props {
   navigation: MakePostScreenNavigationProp;
+  route: MakePostScreenRouteProp;
 }
 
-const MakePostScreen: React.FC<Props> = ({ navigation }) => {
-  const [title, setTitle] = useState<string>('');
-  const [caption, setCaption] = useState<string>('');
-  const [imageUrl, setImageUrl] = useState<string>('');
+const MakePostScreen: React.FC<Props> = ({ navigation, route }) => {
+  const userId = route.params.userId;
 
-  // Helper function to handle text input changes
-  const handleInputChange = (setter: React.Dispatch<React.SetStateAction<string>>, value: string) => {
-    setter(value);
-  };
+  const [caption, setCaption] = useState<string>("");
+  const [image, setImage] = useState<any>(null);
+  const [audio, setAudio] = useState<any>(null);
+  const [links, setLinks] = useState<any>([]);
 
-  // Helper function to handle post creation
-  const handleCreatePost = () => {
-    const postDetails = { title, caption, imageUrl };
-    console.log(postDetails);
-    // Perform further actions like API call or state update here
-    navigation.navigate('Feed');
-  };
-
-  // Helper function to render form inputs
-  const renderInput = (
-    label: string,
-    value: string,
-    onChange: (text: string) => void,
-    placeholder: string,
-    multiline = false,
-    numberOfLines?: number
-  ) => (
-    <TextInput
-      label={label}
-      value={value}
-      onChangeText={onChange}
-      mode="outlined"
-      placeholder={placeholder}
-      style={styles.input}
-      multiline={multiline}
-      numberOfLines={numberOfLines}
-    />
-  );
-
-  // Function to open image picker
-  const handleImageUpload = () => {
-    const options = {
-      mediaType: 'photo',
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: "images",
+      allowsEditing: true,
+      aspect: [4, 3],
       quality: 1,
-    };
-
-    launchImageLibrary(options, (response) => {
-      if (response.assets && response.assets.length > 0) {
-        const selectedImage = response.assets[0];
-        setImageUrl(selectedImage.uri!);
-      }
     });
+
+    if (!result.canceled) {
+      setImage(result.assets[0]);
+    }
   };
 
-  const renderImagePicker = () => (
-    <View style={styles.logoContainer}>
-      {imageUrl ? (
-        <Image source={{ uri: imageUrl }} style={styles.uploadedImage} />
-      ) : (
-        <TouchableOpacity onPress={handleImageUpload} style={styles.uploadButton}>
-          <Image source={require('../../assets/app-logo.png')} style={styles.logo} />
-          <Text style={styles.uploadText}>Tap to upload an image</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-  
+  const pickAudio = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: "audio/*",
+    });
+
+    if (!result.canceled) {
+      setAudio(result.assets[0]);
+    }
+  };
+
+  const addLink = () => {
+    setLinks([...links, { source: "", url: "" }]);
+  };
+
+  const updateLink = (index: number, key: "source" | "url", value: string) => {
+    const updatedLinks = links.map((link, i) =>
+      i === index ? { ...link, [key]: value } : link
+    );
+    setLinks(updatedLinks);
+  };
+
+  const removeLink = (index: number) => {
+    setLinks(links.filter((_, i) => i !== index));
+  };
+
+  const uploadPost = async () => {
+    console.log("Uploading Post");
+    console.log(SERVERIP);
+    console.log(SERVERPORT);
+    console.log(caption);
+    console.log(image);
+    console.log(audio);
+    console.log(links);
+    try {
+      const formData = new FormData();
+      formData.append("ownerUser", userId);
+      formData.append("likesCount", "0");
+      formData.append("caption", caption);
+      formData.append("outLinks", JSON.stringify(links));
+
+      if (audio) {
+        const uri = audio.uri;
+        let type = uri.substring(uri.lastIndexOf(".") + 1);
+        formData.append("audio", {
+          uri,
+          name: "media",
+          type: `image/${type}`,
+        } as any);
+      }
+
+      if (image) {
+        const uri = image.uri;
+        let type = uri.substring(uri.lastIndexOf(".") + 1);
+        formData.append("albumCover", {
+          uri,
+          name: "media",
+          type: `image/${type}`,
+        } as any);
+      }
+
+      const response = await fetch(
+        `http://${SERVERIP}:${SERVERPORT}/api/upload/uploadPost`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const responseData = await response.json();
+      console.log(responseData);
+
+      setImage(null);
+      setAudio(null);
+      setCaption("");
+      setLinks([]);
+      navigation.navigate("Feed", { userId });
+    } catch (error) {
+      console.error("Error uploading post:", error);
+      navigation.navigate("Feed", { userId });
+    }
+  };
 
   return (
-    <View style={styles.container}>
-      {renderImagePicker()}
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Create a New Post</Text>
 
-      <View style={styles.formContainer}>
-        {renderInput('Title', title, (text) => handleInputChange(setTitle, text), 'Enter post title')}
-        {renderInput('Caption', caption, (text) => handleInputChange(setCaption, text), 'Enter post caption', true, 3)}
-        
-        {/* Image URL input is optional since we are using image upload */}
-        <TextInput
-          label="Image URL"
-          value={imageUrl}
-          onChangeText={(text) => handleInputChange(setImageUrl, text)}
-          mode="outlined"
-          placeholder="Optional: Enter image URL"
-          style={styles.input}
-        />
+      {/* Image Picker */}
+      <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+        {image ? (
+          <Image source={{ uri: image.uri }} style={styles.imagePreview} />
+        ) : (
+          <Text style={styles.imagePickerText}>Select Image</Text>
+        )}
+      </TouchableOpacity>
 
-        <Button mode="contained" onPress={handleCreatePost} style={styles.postButton}>
-          Create Post
-        </Button>
+      {/* Audio Picker */}
+      <TouchableOpacity style={styles.audioPicker} onPress={pickAudio}>
+        <Text style={styles.audioText}>
+          {audio ? audio.name : "Select Audio"}
+        </Text>
+        <View style={styles.audioWave}>
+          <View style={styles.waveLine}></View>
+          <View style={[styles.waveLine, styles.tall]}></View>
+          <View style={styles.waveLine}></View>
+          <View style={[styles.waveLine, styles.tall]}></View>
+          <View style={styles.waveLine}></View>
+        </View>
+      </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('Feed')}>
-          <Text style={styles.link}>Back Home</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      {/* Caption Input */}
+      <TextInput
+        style={styles.input}
+        textColor="#FFFFFF"
+        placeholder="Write a caption..."
+        value={caption}
+        onChangeText={setCaption}
+        mode="outlined"
+        theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }}
+      />
+
+      {/* Links Section */}
+      <Text style={styles.sectionTitle}>Add Links</Text>
+      {links.map((link, index) => (
+        <View key={index} style={styles.linkContainer}>
+          <TextInput
+            style={styles.linkInput}
+            textColor="#FFFFFF"
+            placeholder="Source (e.g., YouTube)"
+            value={link.source}
+            onChangeText={(text) => updateLink(index, "source", text)}
+            mode="outlined"
+            theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }}
+          />
+          <TextInput
+            style={styles.linkInput}
+            textColor="#FFFFFF"
+            placeholder="URL (e.g., https://example.com)"
+            value={link.url}
+            onChangeText={(text) => updateLink(index, "url", text)}
+            mode="outlined"
+            theme={{ colors: { text: "#FFFFFF", placeholder: "#FFFFFF" } }}
+          />
+          <Button
+            mode="outlined"
+            onPress={() => removeLink(index)}
+            style={styles.removeButton}
+          >
+            Remove
+          </Button>
+        </View>
+      ))}
+      <Button onPress={addLink} style={styles.addLinkButton}>
+        Add Link
+      </Button>
+
+      <Button onPress={uploadPost} style={styles.postButton}>
+        Upload Post
+      </Button>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
-    paddingTop: 50,
-    paddingHorizontal: 16,
+    backgroundColor: "#000000",
+    padding: 16,
   },
-  logoContainer: {
-    flex: 0.6,
-    justifyContent: 'center',
-    alignItems: 'center',
+  title: {
+    fontSize: 24,
+    color: "#A8EB12",
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 20,
   },
-  logo: {
-    width: 200,
-    height: 200,
-    resizeMode: 'contain',
+  imagePicker: {
+    height: 150,
+    backgroundColor: "#1a1a1a",
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#A8EB12",
   },
-  uploadedImage: {
-    width: 200,
-    height: 200,
-    resizeMode: 'cover',
-    borderRadius: 8,
+  imagePickerText: {
+    color: "#A8EB12",
+    fontSize: 16,
   },
-  uploadText: {
-    color: '#A8EB12',
-    marginTop: 10,
-    textAlign: 'center',
+  imagePreview: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 10,
   },
-  formContainer: {
-    flex: 1.4,
-    paddingHorizontal: 16,
-    justifyContent: 'flex-start',
+  audioPicker: {
+    backgroundColor: "#4D4D4D",
+    borderRadius: 5,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  audioText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+  },
+  audioWave: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 10,
+  },
+  waveLine: {
+    width: 5,
+    height: 10,
+    backgroundColor: "#A8EB12",
+    marginHorizontal: 2,
+    borderRadius: 2,
+  },
+  tall: {
+    height: 20,
   },
   input: {
-    marginBottom: 16,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: "#1a1a1a",
+    marginBottom: 20,
+    color: "#FFFFFF",
+  },
+  sectionTitle: {
+    fontSize: 18,
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  linkContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  linkInput: {
+    flex: 1,
+    marginHorizontal: 5,
+    backgroundColor: "#1a1a1a",
+  },
+  removeButton: {
+    backgroundColor: "#d9534f",
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    justifyContent: "center",
+  },
+  addLinkButton: {
+    backgroundColor: "#4D4D4D",
+    borderRadius: 5,
+    paddingVertical: 10,
+    marginVertical: 10,
   },
   postButton: {
-    backgroundColor: '#A8EB12',
-    marginTop: 20,
-  },
-  link: {
-    color: '#A8EB12',
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  uploadButton: {
-    alignItems: 'center',
+    backgroundColor: "#A8EB12",
+    borderRadius: 5,
+    paddingVertical: 10,
+    marginVertical: 20,
   },
 });
 

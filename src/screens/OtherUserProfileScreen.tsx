@@ -25,21 +25,24 @@ const handleError = (error: any, context: string) => {
   Alert.alert("Error", `Something went wrong: ${error.message}`);
 };
 
-type ProfileScreenNavigationProp = StackNavigationProp<
+type OtherUserProfileScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "Profile"
+  "OtherUserProfile"
 >;
-type ProfileScreenRouteProp = RouteProp<RootStackParamList, "Profile">;
+type OtherUserProfileScreenRouteProp = RouteProp<
+  RootStackParamList,
+  "OtherUserProfile"
+>;
 
 const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
 const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
 
 interface Props {
-  navigation: ProfileScreenNavigationProp;
-  route: ProfileScreenRouteProp;
+  navigation: OtherUserProfileScreenNavigationProp;
+  route: OtherUserProfileScreenRouteProp;
 }
 
-const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
+const OtherUserProfileScreen: React.FC<Props> = ({ navigation, route }) => {
   const [user, setUser] = useState({
     _id: "",
     userName: "",
@@ -53,6 +56,11 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     userAvatarUrl: "",
   });
 
+  const [currentUser, setCurrentUser] = useState({
+    _id: "",
+    following: [] as string[],
+  });
+
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -62,7 +70,98 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     setRefreshing(false);
   };
 
-  const userId = route.params.userId;
+  const handleFollow = async () => {
+    try {
+      console.log("Updating: Following user...");
+      const updatedFollowing = [...currentUser.following, userId];
+      const response = await fetch(
+        `http://${SERVERIP}:${SERVERPORT}/api/user/${currentUserId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ following: updatedFollowing }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Error following user: ${response.statusText}`);
+      }
+
+      const updatedFollowerCount = user.followerCount + 1;
+      const updatedUser = await fetch(
+        `http://${SERVERIP}:${SERVERPORT}/api/user/${userId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ followerCount: updatedFollowerCount }),
+        }
+      );
+      setUser((prev) => ({
+        ...prev,
+        followerCount: updatedFollowerCount,
+      }));
+
+      setCurrentUser((prev) => ({
+        ...prev,
+        following: updatedFollowing,
+      }));
+    } catch (error) {
+      handleError(error, "Following user");
+    }
+  };
+
+  const handleUnfollow = async () => {
+    try {
+      console.log("Updating: Unfollowing user...");
+      const updatedFollowing = currentUser.following.filter(
+        (id) => id !== userId
+      );
+
+      const response = await fetch(
+        `http://${SERVERIP}:${SERVERPORT}/api/user/${currentUserId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ following: updatedFollowing }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Error unfollowing user: ${response.statusText}`);
+      }
+
+      const updatedFollowerCount = user.followerCount - 1;
+      const updatedUser = await fetch(
+        `http://${SERVERIP}:${SERVERPORT}/api/user/${userId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ followerCount: updatedFollowerCount }),
+        }
+      );
+
+      setUser((prev) => ({
+        ...prev,
+        followerCount: updatedFollowerCount,
+      }));
+
+      setCurrentUser((prev) => ({
+        ...prev,
+        following: updatedFollowing,
+      }));
+    } catch (error) {
+      handleError(error, "Unfollowing user");
+    }
+  };
+
+  const userId = route.params.otherUserId;
+  const currentUserId = route.params.userId;
 
   const getUserAvatar = async (avatarId: string) => {
     try {
@@ -180,6 +279,17 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     getUser(userId);
   }, [userId]);
 
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const currentUserResponse = await fetch(
+        `http://${SERVERIP}:${SERVERPORT}/api/user/${currentUserId}`
+      );
+      const currentUserJson = await currentUserResponse.json();
+      setCurrentUser(currentUserJson);
+    };
+    getCurrentUser();
+  }, [currentUserId]);
+
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -225,21 +335,31 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
         <View style={styles.bioSection}>
           <Text style={styles.bio}>{user.profileDescription}</Text>
         </View>
+        <View style={styles.buttonContainer}>
+          {currentUser.following.includes(userId) ? (
+            <Button
+              mode="contained"
+              style={[styles.button, styles.unfollowButton]}
+              onPress={handleUnfollow}
+            >
+              Unfollow
+            </Button>
+          ) : (
+            <Button
+              mode="contained"
+              style={[styles.button, styles.followButton]}
+              onPress={handleFollow}
+            >
+              Follow
+            </Button>
+          )}
+        </View>
         <View style={styles.genresContainer}>
           {user.genres.map((genre, index) => (
             <Text style={styles.genre} key={index}>
               {genre}
             </Text>
           ))}
-        </View>
-        <View style={styles.buttonContainer}>
-          <Button
-            mode="contained"
-            style={styles.button}
-            onPress={() => navigation.navigate("EditProfile", { userId })}
-          >
-            Edit Profile
-          </Button>
         </View>
         {/* Followers/Following Section */}
         <View style={styles.followSection}>
@@ -254,7 +374,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
             onPress={() =>
               navigation.navigate("Follow", {
                 userId: userId,
-                currentUserId: userId,
+                currentUserId: currentUserId,
               })
             }
           >
@@ -289,28 +409,34 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
       <View style={styles.footer}>
         <TouchableOpacity
           style={styles.iconButton}
-          onPress={() => navigation.navigate("Feed", { userId })}
+          onPress={() => navigation.navigate("Feed", { userId: currentUserId })}
         >
           <Ionicons name="musical-notes" size={35} color="#A8EB12" />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.iconButton}
-          onPress={() => navigation.navigate("Search", { userId })}
+          onPress={() =>
+            navigation.navigate("Search", { userId: currentUserId })
+          }
         >
           <Ionicons name="search-outline" size={35} color="#A8EB12" />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.iconButton}
-          onPress={() => navigation.navigate("MakePost", { userId })}
+          onPress={() =>
+            navigation.navigate("MakePost", { userId: currentUserId })
+          }
         >
           <Ionicons name="add-circle-outline" size={35} color="#A8EB12" />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.iconButton}
-          onPress={() => navigation.navigate("Profile", { userId })}
+          onPress={() =>
+            navigation.navigate("Profile", { userId: currentUserId })
+          }
         >
           <Ionicons name="person-circle-outline" size={35} color="#fff" />
         </TouchableOpacity>
@@ -320,6 +446,12 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
+  unfollowButton: {
+    backgroundColor: "#A8EB12",
+  },
+  followButton: {
+    backgroundColor: "#A8EB12",
+  },
   mainScroll: {
     flex: 1,
     backgroundColor: "#000", // Match your background color
@@ -489,4 +621,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProfileScreen;
+export default OtherUserProfileScreen;
