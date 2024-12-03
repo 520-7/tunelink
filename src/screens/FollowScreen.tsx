@@ -137,7 +137,9 @@ const FollowScreen: React.FC<Props> = ({ navigation, route }) => {
       if (response.ok) {
         console.log("Successfully retrieved user");
         setUser(responseData);
-        getUserAvatar(responseData.userAvatarUrl);
+        if (responseData.userAvatarUrl) {
+          getUserAvatar(responseData.userAvatarUrl);
+        }
         getFollowing(responseData.following);
       } else {
         console.error("Server error:", response);
@@ -167,7 +169,10 @@ const FollowScreen: React.FC<Props> = ({ navigation, route }) => {
       {/* Header */}
 
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.iconButton}
+        >
           <Ionicons name="arrow-back" size={24} color="#A8EB12" />
         </TouchableOpacity>
 
@@ -315,8 +320,8 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     padding: 10,
-    marginRight: 15, 
-    color: "#A8EB12"
+    marginRight: 15,
+    color: "#A8EB12",
   },
   addButton: {
     position: "absolute",

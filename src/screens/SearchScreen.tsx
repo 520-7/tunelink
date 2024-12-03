@@ -78,13 +78,6 @@ const SearchScreen: React.FC<Props> = ({ navigation, route }) => {
 
     try {
       if (searchByGenre) {
-        //not sure how to properly implement genre call, seems different than the other endpoints
-        const options = {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ genre: query }),
-        };
-
         const endpoint = `http://${SERVERIP}:${SERVERPORT}/api/user/search-by-genre/${query}`;
         const response = await fetch(endpoint);
 
@@ -95,7 +88,7 @@ const SearchScreen: React.FC<Props> = ({ navigation, route }) => {
         }
 
         const data = await response.json();
-        setResults(data.users);
+        setResults(data);
       } else {
         const response = await fetch(
           `http://${SERVERIP}:${SERVERPORT}/api/user/username/${query}`
