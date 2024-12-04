@@ -18,12 +18,16 @@ import { ActivityIndicator } from "react-native";
 import { Alert } from "react-native";
 import { Button } from "react-native-paper";
 
+
+//Set a default avatar if user doesn't select one 
 const DEFAULT_AVATAR_URL = "https://via.placeholder.com/150";
 
+//Error handler 
 const handleError = (error: any, context: string) => {
   console.error(`${context}:`, error);
   Alert.alert("Error", `Something went wrong: ${error.message}`);
 };
+
 
 type OtherUserProfileScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -34,14 +38,17 @@ type OtherUserProfileScreenRouteProp = RouteProp<
   "OtherUserProfile"
 >;
 
+//Server config variables
 const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
 const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
 
+// Props interface
 interface Props {
   navigation: OtherUserProfileScreenNavigationProp;
   route: OtherUserProfileScreenRouteProp;
 }
 
+// Main functional component for displaying another user's profile
 const OtherUserProfileScreen: React.FC<Props> = ({ navigation, route }) => {
   const [user, setUser] = useState({
     _id: "",
@@ -61,16 +68,20 @@ const OtherUserProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     following: [] as string[],
   });
 
+  //States for refreshing and loading
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
+   // Function to refresh user data when called
   const refreshData = async () => {
     setRefreshing(true);
     await getUser(userId);
     setRefreshing(false);
   };
 
+    // Function to handle following a user
   const handleFollow = async () => {
+    //Update following list of the user
     try {
       console.log("Updating: Following user...");
       const updatedFollowing = [...currentUser.following, userId];
@@ -89,6 +100,7 @@ const OtherUserProfileScreen: React.FC<Props> = ({ navigation, route }) => {
       }
 
       const updatedFollowerCount = user.followerCount + 1;
+      //Set updated follower count
       const updatedUser = await fetch(
         `http://${SERVERIP}:${SERVERPORT}/api/user/${userId}`,
         {
@@ -113,6 +125,7 @@ const OtherUserProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  //Function to handle unfollowing a user 
   const handleUnfollow = async () => {
     try {
       console.log("Updating: Unfollowing user...");
@@ -120,6 +133,7 @@ const OtherUserProfileScreen: React.FC<Props> = ({ navigation, route }) => {
         (id) => id !== userId
       );
 
+      //Send updated following
       const response = await fetch(
         `http://${SERVERIP}:${SERVERPORT}/api/user/${currentUserId}`,
         {
@@ -130,10 +144,12 @@ const OtherUserProfileScreen: React.FC<Props> = ({ navigation, route }) => {
           body: JSON.stringify({ following: updatedFollowing }),
         }
       );
+      //Error handling
       if (!response.ok) {
         throw new Error(`Error unfollowing user: ${response.statusText}`);
       }
 
+      // Decrement following
       const updatedFollowerCount = user.followerCount - 1;
       const updatedUser = await fetch(
         `http://${SERVERIP}:${SERVERPORT}/api/user/${userId}`,
@@ -160,9 +176,11 @@ const OtherUserProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  //Get other user's id 
   const userId = route.params.otherUserId;
   const currentUserId = route.params.userId;
 
+  // Function to fetch user's avatar based on avatar ID
   const getUserAvatar = async (avatarId: string) => {
     try {
       if (!avatarId) {
@@ -198,6 +216,7 @@ const OtherUserProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // Function to fetch posts of the user based on their post IDs
   const getPosts = async (ownedPosts: string[]) => {
     try {
       const fetchedPosts = await Promise.all(
@@ -217,6 +236,7 @@ const OtherUserProfileScreen: React.FC<Props> = ({ navigation, route }) => {
               `http://${SERVERIP}:${SERVERPORT}/api/files/albumCover/${post.albumCoverUrl}`
             );
 
+            //Error handling for fetching album cover
             if (!albumCoverResponse.ok) {
               throw new Error(
                 `Error fetching album cover: ${albumCoverResponse.statusText}`
@@ -251,6 +271,8 @@ const OtherUserProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // Function to fetch a user's data based on their ID
+
   const getUser = async (userId: string) => {
     setLoading(true);
     try {
@@ -261,9 +283,9 @@ const OtherUserProfileScreen: React.FC<Props> = ({ navigation, route }) => {
 
       if (response.ok) {
         console.log("Successfully retrieved user");
-        setUser(responseData);
-        getUserAvatar(responseData.userAvatarUrl);
-        getPosts(responseData.ownedPosts);
+        setUser(responseData); // Set the retrieved user data in state
+        getUserAvatar(responseData.userAvatarUrl); //// Fetch user's avatar
+        getPosts(responseData.ownedPosts); // Get posts 
       } else {
         console.error("Server error:", response);
       }
@@ -275,6 +297,7 @@ const OtherUserProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // Effect hook to fetch user data whhen `userId` changes
   useEffect(() => {
     getUser(userId);
   }, [userId]);
@@ -298,6 +321,7 @@ const OtherUserProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     );
   }
 
+  //UI and styling
   return (
     <View style={styles.container}>
       <ScrollView

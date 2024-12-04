@@ -18,19 +18,23 @@ import { ActivityIndicator } from "react-native";
 import { Alert } from "react-native";
 import { Button } from "react-native-paper";
 
+// Set a default avatar if user doesn't select one
 const DEFAULT_AVATAR_URL = "https://via.placeholder.com/150";
 
+// Error handler function to show errors and alerts
 const handleError = (error: any, context: string) => {
   console.error(`${context}:`, error);
   Alert.alert("Error", `Something went wrong: ${error.message}`);
 };
 
+//Navigation properties
 type ProfileScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   "Profile"
 >;
 type ProfileScreenRouteProp = RouteProp<RootStackParamList, "Profile">;
 
+// Server config variables
 const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
 const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
 
@@ -39,6 +43,7 @@ interface Props {
   route: ProfileScreenRouteProp;
 }
 
+// Main functional component for the profile screen
 const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
   const [user, setUser] = useState({
     _id: "",
@@ -53,17 +58,22 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     userAvatarUrl: "",
   });
 
+
+  //States for refreshing and loading
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Function to refresh user data when called
   const refreshData = async () => {
     setRefreshing(true);
     await getUser(userId);
     setRefreshing(false);
   };
 
+  // Get user ID from route params
   const userId = route.params.userId;
 
+  // Function to fetch user's avatar based on avatar ID
   const getUserAvatar = async (avatarId: string) => {
     try {
       if (!avatarId) {
@@ -93,12 +103,14 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
         }));
       };
       reader.readAsDataURL(blob);
+      //Error handling for user avatar
     } catch (error) {
       handleError(error, "Fetching avatar");
       console.error("Failed to fetch user avatar:", error);
     }
   };
 
+    // Function to fetch posts by the user based on their post IDs
   const getPosts = async (ownedPosts: string[]) => {
     try {
       const fetchedPosts = await Promise.all(
@@ -117,7 +129,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
             const albumCoverResponse = await fetch(
               `http://${SERVERIP}:${SERVERPORT}/api/files/albumCover/${post.albumCoverUrl}`
             );
-
+            //Error handling for fetching album cover
             if (!albumCoverResponse.ok) {
               throw new Error(
                 `Error fetching album cover: ${albumCoverResponse.statusText}`
@@ -152,6 +164,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // Function to fetch a user's data based on their ID
   const getUser = async (userId: string) => {
     setLoading(true);
     try {
@@ -162,8 +175,8 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
 
       if (response.ok) {
         console.log("Successfully retrieved user");
-        setUser(responseData);
-        getUserAvatar(responseData.userAvatarUrl);
+        setUser(responseData); // Set the retrieved user data in state
+        getUserAvatar(responseData.userAvatarUrl); //// Fetch user's avatar
         getPosts(responseData.ownedPosts);
       } else {
         console.error("Server error:", response);
@@ -176,6 +189,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // Effect hook to fetch user data when `userId` changes
   useEffect(() => {
     getUser(userId);
   }, [userId]);
@@ -188,6 +202,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     );
   }
 
+  //UI element + stying
   return (
     <View style={styles.container}>
       <ScrollView
