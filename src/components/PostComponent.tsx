@@ -10,11 +10,14 @@ import {
 import { Video } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 
+
+// Define comment interface
 interface Comment {
   username: string;
   text: string;
 }
 
+// Define post interface
 interface PostProps {
   post: {
     id: string;
@@ -27,16 +30,18 @@ interface PostProps {
     spotifyUri?: string;
     comments: Comment[];
   };
-  isCurrent: boolean; // Indicates if this post is currently visible
+  isCurrent: boolean;
 }
 
+// Retrieve dimensions
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
+// Post component
 const PostComponent: React.FC<PostProps> = ({ post, isCurrent }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [likes, setLikes] = useState(123); // Example like count
+  const [likes, setLikes] = useState(123);
 
   // Mute/Unmute functionality
   const toggleMute = () => {

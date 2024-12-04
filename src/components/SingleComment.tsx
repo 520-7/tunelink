@@ -9,6 +9,7 @@ interface CommentProps {
   };
 }
 
+// Single comment component
 const SingleComment: React.FC<CommentProps> = ({ comment }) => {
   return (
     <View style={styles.container}>

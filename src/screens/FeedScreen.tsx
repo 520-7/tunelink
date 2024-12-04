@@ -26,21 +26,25 @@ const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
 
 const DEFAULT_AVATAR = require("../../assets/app-logo.png");
 
+// Function to retrieve album
 const getAlbumCoverUrl = (fileId: string) => {
   if (!fileId) return "";
   return `http://${SERVERIP}:${SERVERPORT}/api/files/albumCover/${fileId}`;
 };
 
+// Function to retrieve audio
 const getAudioUrl = (fileId: string) => {
   if (!fileId) return "";
   return `http://${SERVERIP}:${SERVERPORT}/api/files/audio/${fileId}`;
 };
 
+// Function to retrieve avatar
 const getUserAvatarUrl = (fileId: string) => {
   if (!fileId) return "";
   return `http://${SERVERIP}:${SERVERPORT}/api/files/userAvatar/${fileId}`;
 };
 
+// Function to retrieve timestamp
 const getTimeAgo = (timestamp: string) => {
   const now = new Date();
   const postDate = new Date(timestamp);
@@ -60,6 +64,7 @@ type OutLink = {
   url: string;
 };
 
+// Interface for user
 type User = {
   _id: string;
   userAvatarUrl: string;
@@ -73,6 +78,7 @@ type User = {
   ownedPosts: string[];
 };
 
+// Interface for post
 type Post = {
   _id: string;
   ownerUser: string;
@@ -88,11 +94,13 @@ type Post = {
 type FeedScreenNavigationProp = StackNavigationProp<RootStackParamList, "Feed">;
 type FeedScreenRouteProp = RouteProp<RootStackParamList, "Feed">;
 
+// Interface for props
 interface Props {
   navigation: FeedScreenNavigationProp;
   route: FeedScreenRouteProp;
 }
 
+// Feed component
 const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
   const userId = route.params.userId;
   const [posts, setPosts] = useState<Post[]>([]);
@@ -129,6 +137,7 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
     return unsubscribe;
   }, [navigation]);
 
+  // Function to automatically play sound
   const playSound = async (audioUrl: string) => {
     try {
       if (soundRef.current) {
@@ -165,6 +174,7 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // Function to update when played
   const onPlaybackStatusUpdate = async (status: AVPlaybackStatus) => {
     if (!status.isLoaded) return;
     
@@ -202,6 +212,7 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // Function to fetch posts
   const fetchPosts = async () => {
     try {
       const response = await fetch(
@@ -259,6 +270,7 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
     fetchPosts();
   }, [userId]);
 
+  // Function to see next post
   const goToNextPost = async () => {
     if (currentIndex < posts.length - 1) {
       // Reset audio state
@@ -394,6 +406,7 @@ const FeedScreen: React.FC<Props> = ({ navigation, route }) => {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
+  // Function to render post
   const renderPost = (post: Post) => {
     let parsedOutLinks: OutLink[] = [];
     if (post.outLinks) {

@@ -17,6 +17,7 @@ interface CommentComponentProps {
 
 const { height } = Dimensions.get('window');
 
+// Define comment component
 const CommentComponent: React.FC<CommentComponentProps> = ({ comments, onClose }) => {
   return (
     <TouchableOpacity style={styles.overlay} onPress={onClose}>

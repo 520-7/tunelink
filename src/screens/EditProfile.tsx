@@ -24,13 +24,17 @@ type EditProfileScreenNavigationProp = StackNavigationProp<
 
 type EditProfileScreenRouteProp = RouteProp<RootStackParamList, "EditProfile">;
 
+// Props interface
 interface Props {
   navigation: EditProfileScreenNavigationProp;
   route: EditProfileScreenRouteProp;
 }
 
+// Server definition
 const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
 const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
+
+// Function to define making edits to profile
 const EditProfileScreen: React.FC<Props> = ({ navigation, route }) => {
   const userId = route.params.userId;
   const [profilename, setProfileName] = useState<string>("");
@@ -56,8 +60,7 @@ const EditProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     "Disco",
   ];
 
-
-    
+// Function to pick image to upload to profile
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
@@ -71,7 +74,7 @@ const EditProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
-
+// Function to update profile visually
   useEffect(() => {
     const updateValues = async () => {
       const existingUser = await fetch(
@@ -90,6 +93,7 @@ const EditProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     updateValues();
   }, [userId]);
 
+// Function to update profile based on changes in database
   const handleUpdateProfile = async () => {
     console.log("Updating profile");
   
@@ -122,7 +126,8 @@ const EditProfileScreen: React.FC<Props> = ({ navigation, route }) => {
       console.error("Error updating profile:", error);
     }
   };
-    
+
+  // Function to keep track of genres selected by user
   const toggleGenre = (genre: string) => {
     if (selectedGenres.includes(genre)) {
       setSelectedGenres(selectedGenres.filter((item) => item !== genre));
@@ -131,6 +136,7 @@ const EditProfileScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // Function to determine if genre is selected
   const isSelected = (genre: string) => selectedGenres.includes(genre);
 
   return (
@@ -220,15 +226,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 300,
     height: 300,
-    backgroundColor: "rgba(168, 235, 18, 0.2)", // Lime green with transparency
-    borderRadius: 150, // Circle shape
+    backgroundColor: "rgba(168, 235, 18, 0.2)",
+    borderRadius: 150,
     top: -100,
     left: -100,
-    opacity: 0.7, // Set opacity for a softer glow
+    opacity: 0.7,
     shadowColor: "#A8EB12",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
-    shadowRadius: 50, // Create a glow effect by spreading the shadow
+    shadowRadius: 50,
   },
   formContainer: {
     flex: 1,
@@ -257,23 +263,23 @@ const styles = StyleSheet.create({
     backgroundColor: "#1a1a1a",
   },
   genreButton: {
-    backgroundColor: "#4D4D4D", // Dark gray for unselected
+    backgroundColor: "#4D4D4D",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
     marginBottom: 10,
     marginRight: 10,
-    flexGrow: 1, // Allow buttons to grow and fill the space in rows with fewer buttons
-    alignItems: "center", // Center the text in the button
+    flexGrow: 1,
+    alignItems: "center",
   },
   genreButtonSelected: {
-    backgroundColor: "#A8EB12", // Neon green when selected
+    backgroundColor: "#A8EB12",
   },
   genreButtonText: {
-    color: "#FFFFFF", // White text for unselected
+    color: "#FFFFFF",
   },
   genreButtonTextSelected: {
-    color: "#000000", // Black text when selected
+    color: "#000000",
   },
   image: {
     width: "100%",
