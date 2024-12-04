@@ -22,7 +22,7 @@ interface Props {
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-
+  const [errorMessage, setErrorMessage] = useState<string>("");
   // Function to validate login credentials
   const handleLogin = async () => {
     // For testing purposes remove later
@@ -39,12 +39,16 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         console.error("Login failed:", responseData);
       }
     } catch (error) {
+      setErrorMessage("Invalid email or password. Please try again.");
       console.error("Network request failed:", error);
     }
   };
 
   return (
     <View style={styles.container}>
+      {errorMessage ? (
+        <Text style={styles.errorMessage}>{errorMessage}</Text>
+      ) : null}
       <View style={styles.logoContainer}>
         <Image
           source={require("../../assets/app-logo.png")}
@@ -90,6 +94,11 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  errorMessage: {
+    color: "#FF0000",
+    textAlign: "center",
+    marginTop: 20,
+  },
   container: {
     flex: 1,
     backgroundColor: "#000000",

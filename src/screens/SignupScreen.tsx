@@ -15,7 +15,7 @@ import * as ImagePicker from "expo-image-picker";
 
 import { signup } from "../services/authService";
 
-// Define navigation type 
+// Define navigation type
 type SignupScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   "Signup"
@@ -57,6 +57,11 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
   // Function to handle the signup process
   const handleSignup = async () => {
     try {
+      if (password.length < 4) {
+        setErrorMessage("Password must be at least 4 characters long.");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("email", email);
       formData.append("password", password);
@@ -77,12 +82,10 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
 
       console.log(formData);
 
-
-
       const responseData = await signup(formData);
       if (responseData && responseData.userId) {
         console.log(responseData);
-        // Navigate to the Onboarding screen if sucess 
+        // Navigate to the Onboarding screen if success
         navigation.navigate("Onboarding", { userId: responseData.userId });
       } else {
         setErrorMessage("Failed to sign up. Please try again later.");
