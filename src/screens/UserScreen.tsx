@@ -16,6 +16,7 @@ import { ActivityIndicator } from "react-native";
 
 import { Alert } from "react-native";
 
+//Set default avatar for user 
 const DEFAULT_AVATAR_URL = "https://via.placeholder.com/150";
 
 
@@ -24,20 +25,24 @@ const handleError = (error: any, context: string) => {
   Alert.alert("Error", `Something went wrong: ${error.message}`);
 };
 
+//Defining navigatoin prop
 type UserScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   "User"
 >;
 type UserScreenRouteProp = RouteProp<RootStackParamList, "User">;
 
+//environment variables
 const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
 const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
 
+//Prop interface
 interface Props {
   navigation: UserScreenNavigationProp;
   route: UserScreenRouteProp;
 }
 
+// State for user data and loading states
 const UserScreen: React.FC<Props> = ({ navigation, route }) => {
   const [user, setUser] = useState({
     _id: "",
@@ -52,6 +57,7 @@ const UserScreen: React.FC<Props> = ({ navigation, route }) => {
     userAvatarUrl: "",
   });
 
+  //Refresh and loading states
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -63,6 +69,7 @@ const UserScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const userId = route.params.userId;
 
+  // Fetch and set the user's avatar
   const getUserAvatar = async (avatarId: string) => {
     try {
       if (!avatarId) {
@@ -98,6 +105,7 @@ const UserScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // Fetch and set user's posts
   const getPosts = async (ownedPosts: string[]) => {
     try {
       const fetchedPosts = await Promise.all(
@@ -113,6 +121,7 @@ const UserScreen: React.FC<Props> = ({ navigation, route }) => {
           const post = await response.json();
 
           if (post.albumCoverUrl) {
+             // Fetch album cover image for the post
             const albumCoverResponse = await fetch(
               `http://${SERVERIP}:${SERVERPORT}/api/files/albumCover/${post.albumCoverUrl}`
             );
@@ -151,6 +160,7 @@ const UserScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // Fetch user data from the server
   const getUser = async (userId: string) => {
     setLoading(true);
     try {
@@ -175,6 +185,7 @@ const UserScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // Fetch user data when the component mounts or userId changes
   useEffect(() => {
     getUser(userId);
   }, [userId]);
@@ -187,6 +198,7 @@ const UserScreen: React.FC<Props> = ({ navigation, route }) => {
     );
   }
 
+  //UI and styling
   return (
     <View style={styles.container}>
       {/* Header */}

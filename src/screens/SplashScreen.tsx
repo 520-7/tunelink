@@ -4,15 +4,18 @@ import { View, StyleSheet, Image } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../navigation/RootStackParamList"; // Define your navigation types
 
+// Define the navigation pop type
 type SplashScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   "Splash"
 >;
 
+//Component props, including navigation
 interface Props {
   navigation: SplashScreenNavigationProp;
 }
 
+// Main SplashScreen functional component
 const SplashScreen: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -32,6 +35,7 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
   );
 };
 
+// Define styles for the SplashScreen 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
