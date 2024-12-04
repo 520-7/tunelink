@@ -24,6 +24,8 @@ cd tunelink-frontend
 
 ## Getting Started
 
+Please read the .env file to set up the environment variables. You will need to replace the IP address with your own!
+
 To install all dependencies for the project, you can run:
 
 ### ```npm install```
