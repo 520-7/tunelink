@@ -17,11 +17,13 @@ type OnboardingScreenRouteProp = RouteProp<RootStackParamList, "Onboarding">;
 const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
 const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
 
+// Interface for props
 interface Props {
   navigation: OnboardingScreenNavigationProp;
   route: OnboardingScreenRouteProp;
 }
 
+// Onboard screen
 const OnboardingScreen: React.FC<Props> = ({ navigation, route }) => {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const userId = route.params.userId;
@@ -44,6 +46,7 @@ const OnboardingScreen: React.FC<Props> = ({ navigation, route }) => {
     "Disco",
   ];
 
+  // Function to pick and unpick genres and change ui
   const toggleGenre = (genre: string) => {
     if (selectedGenres.includes(genre)) {
       setSelectedGenres(selectedGenres.filter((item) => item !== genre));
@@ -52,6 +55,7 @@ const OnboardingScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // Function to handle next
   const handleContinue = async () => {
     try {
       const updateUserData = {
@@ -81,6 +85,7 @@ const OnboardingScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // Function to handle selecting genre
   const isSelected = (genre: string) => selectedGenres.includes(genre);
 
   return (
@@ -129,60 +134,59 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     paddingHorizontal: 16,
-    backgroundColor: "#000000", // Black background
+    backgroundColor: "#000000",
   },
-  // Green Glow Effect
   greenGlow: {
     position: "absolute",
     width: 300,
     height: 300,
-    backgroundColor: "rgba(168, 235, 18, 0.2)", // Lime green with transparency
-    borderRadius: 150, // Circle shape
+    backgroundColor: "rgba(168, 235, 18, 0.2)",
+    borderRadius: 150,
     top: -100,
     left: -100,
-    opacity: 0.7, // Set opacity for a softer glow
+    opacity: 0.7,
     shadowColor: "#A8EB12",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
-    shadowRadius: 50, // Create a glow effect by spreading the shadow
+    shadowRadius: 50,
   },
   title: {
     textAlign: "center",
     fontSize: 24,
-    color: "white", // White text for the title
+    color: "white",
     marginBottom: 20,
   },
   subtitle: {
     textAlign: "center",
     fontSize: 14,
-    color: "#A8EB12", // Lime green text for the subtitle
+    color: "#A8EB12",
     marginBottom: 20,
   },
   genreContainer: {
     flexDirection: "row",
-    flexWrap: "wrap", // Wrap the buttons to the next row when necessary
+    flexWrap: "wrap",
   },
   genreButton: {
-    backgroundColor: "#4D4D4D", // Dark gray for unselected
+    backgroundColor: "#4D4D4D",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
     marginBottom: 10,
     marginRight: 10,
-    flexGrow: 1, // Allow buttons to grow and fill the space in rows with fewer buttons
-    alignItems: "center", // Center the text in the button
+    flexGrow: 1,
+    alignItems: "center",
   },
   genreButtonSelected: {
-    backgroundColor: "#A8EB12", // Neon green when selected
+    backgroundColor: "#A8EB12",
   },
   genreButtonText: {
-    color: "#FFFFFF", // White text for unselected
+    color: "#FFFFFF",
   },
   genreButtonTextSelected: {
-    color: "#000000", // Black text when selected
+    color: "#000000",
   },
   continueButton: {
-    backgroundColor: "#4D4D4D", // Dark gray button
+    backgroundColor: "#4D4D4D",
     marginTop: 20,
   },
 });

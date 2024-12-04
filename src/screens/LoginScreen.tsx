@@ -13,14 +13,17 @@ type LoginScreenNavigationProp = StackNavigationProp<
   "Login"
 >;
 
+// Interface for props
 interface Props {
   navigation: LoginScreenNavigationProp;
 }
 
+// Frontend of login
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
+  // Function to validate login credentials
   const handleLogin = async () => {
     // For testing purposes remove later
     if (email === "test" && password === "test") {
@@ -89,17 +92,17 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000000", // Black background
-    paddingTop: 150, // Add padding to move down contents slightly
+    backgroundColor: "#000000",
+    paddingTop: 150,
   },
   logoContainer: {
-    flex: 0.6, // Adjust logo container size to give space for the logo
+    flex: 0.6,
     justifyContent: "center",
     alignItems: "center",
   },
   logo: {
     width: 200,
-    height: 200, // Adjust the size as needed
+    height: 200,
     resizeMode: "contain",
   },
   formContainer: {

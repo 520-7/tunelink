@@ -30,17 +30,20 @@ type FollowScreenRouteProp = RouteProp<RootStackParamList, "Follow">;
 const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
 const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
 
+// Interface for props
 interface Props {
   navigation: FollowScreenNavigationProp;
   route: FollowScreenRouteProp;
 }
 
+// Interface for following user
 interface FollowingUser {
   id: string;
   userName: string;
   avatarUrl: string;
 }
 
+// Function of information about users user follows
 const FollowScreen: React.FC<Props> = ({ navigation, route }) => {
   const [user, setUser] = useState({
     _id: "",
@@ -58,6 +61,7 @@ const FollowScreen: React.FC<Props> = ({ navigation, route }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Refreshes data periodically
   const refreshData = async () => {
     setRefreshing(true);
     await getUser(userId);
@@ -67,6 +71,7 @@ const FollowScreen: React.FC<Props> = ({ navigation, route }) => {
   const userId = route.params.userId;
   const currentUserId = route.params.currentUserId;
 
+  // Retrieves avatar of user based on id
   const getUserAvatar = async (avatarId: string) => {
     try {
       const response = await fetch(
@@ -94,6 +99,7 @@ const FollowScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // Function to retrieve followers based on id
   const getFollowing = async (following: string[]) => {
     try {
       const fetchedUsers = await Promise.all(
@@ -126,6 +132,7 @@ const FollowScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // Function to get user based on id
   const getUser = async (userId: string) => {
     setLoading(true);
     try {

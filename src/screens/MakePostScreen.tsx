@@ -23,11 +23,13 @@ type MakePostScreenNavigationProp = StackNavigationProp<
 >;
 type MakePostScreenRouteProp = RouteProp<RootStackParamList, "MakePost">;
 
+// Interface for props
 interface Props {
   navigation: MakePostScreenNavigationProp;
   route: MakePostScreenRouteProp;
 }
 
+// Screen to make post
 const MakePostScreen: React.FC<Props> = ({ navigation, route }) => {
   const userId = route.params.userId;
 
@@ -36,6 +38,7 @@ const MakePostScreen: React.FC<Props> = ({ navigation, route }) => {
   const [audio, setAudio] = useState<any>(null);
   const [links, setLinks] = useState<any>([]);
 
+  // Function to select an image
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
@@ -49,6 +52,7 @@ const MakePostScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // Function to select audio
   const pickAudio = async () => {
     const result = await DocumentPicker.getDocumentAsync({
       type: "audio/*",
@@ -59,10 +63,12 @@ const MakePostScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  // Function to add link
   const addLink = () => {
     setLinks([...links, { source: "", url: "" }]);
   };
 
+  // Function to update link
   const updateLink = (index: number, key: "source" | "url", value: string) => {
     const updatedLinks = links.map((link, i) =>
       i === index ? { ...link, [key]: value } : link
@@ -70,10 +76,12 @@ const MakePostScreen: React.FC<Props> = ({ navigation, route }) => {
     setLinks(updatedLinks);
   };
 
+  // Function to remove link
   const removeLink = (index: number) => {
     setLinks(links.filter((_, i) => i !== index));
   };
 
+  // Function to add post to database
   const uploadPost = async () => {
     console.log("Uploading Post");
     console.log(SERVERIP);
@@ -109,6 +117,7 @@ const MakePostScreen: React.FC<Props> = ({ navigation, route }) => {
         } as any);
       }
 
+      // Function to post data to database
       const response = await fetch(
         `http://${SERVERIP}:${SERVERPORT}/api/upload/uploadPost`,
         {
