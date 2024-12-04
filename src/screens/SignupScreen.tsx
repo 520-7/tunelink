@@ -15,11 +15,13 @@ import * as ImagePicker from "expo-image-picker";
 
 import { signup } from "../services/authService";
 
+// Define navigation type 
 type SignupScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   "Signup"
 >;
 
+// Eenvironment variables
 const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
 const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
 
@@ -27,6 +29,7 @@ interface Props {
   navigation: SignupScreenNavigationProp;
 }
 
+// Main SignupScreen functional component
 const SignupScreen: React.FC<Props> = ({ navigation }) => {
   const [email, setEmail] = useState<string>("");
   const [username, setUsername] = useState<string>("");
@@ -37,6 +40,7 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
 
   const [errorMessage, setErrorMessage] = useState<string>("");
 
+  // Function to handle image selection from  ImagePicker library
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
@@ -50,6 +54,7 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  // Function to handle the signup process
   const handleSignup = async () => {
     try {
       const formData = new FormData();
@@ -77,6 +82,7 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
       const responseData = await signup(formData);
       if (responseData && responseData.userId) {
         console.log(responseData);
+        // Navigate to the Onboarding screen if sucess 
         navigation.navigate("Onboarding", { userId: responseData.userId });
       } else {
         setErrorMessage("Failed to sign up. Please try again later.");
@@ -89,6 +95,7 @@ const SignupScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  //UI and styling
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.container}>

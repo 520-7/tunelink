@@ -15,20 +15,24 @@ import { RootStackParamList } from "../navigation/RootStackParamList";
 import { RouteProp } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 
+// Environment variable declaration
 const SERVERIP = process.env.EXPO_PUBLIC_SERVER_IP;
 const SERVERPORT = process.env.EXPO_PUBLIC_SERVER_PORT;
 
+// Defining navigation prop types 
 type SearchScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   "Search"
 >;
 type SearchScreenRouteProp = RouteProp<RootStackParamList, "Search">;
 
+//Global event handling
 const handleError = (error: any, context: string) => {
   console.error(`${context}:`, error);
   Alert.alert("Error", `Something went wrong: ${error.message}`);
 };
 
+//User Object
 type User = {
   _id: string;
   userAvatarUrl: string;
@@ -42,11 +46,13 @@ type User = {
   ownedPosts: string[];
 };
 
+// Props for the SearchScreen navigation and route parameters
 interface Props {
   navigation: SearchScreenNavigationProp;
   route: SearchScreenRouteProp;
 }
 
+// Main SearchScreen functional component
 const SearchScreen: React.FC<Props> = ({ navigation, route }) => {
   const [user, setUser] = useState({
     _id: "",
@@ -61,8 +67,10 @@ const SearchScreen: React.FC<Props> = ({ navigation, route }) => {
     userAvatarUrl: "",
   });
 
+  // Extract userId from route parameters
   const userId = route.params.userId;
 
+   // Function to handle search based on either user name or genre
   const [query, setQuery] = useState("");
   const [searchByGenre, setSearchByGenre] = useState(false);
   const [results, setResults] = useState<User[]>([]);
@@ -74,8 +82,9 @@ const SearchScreen: React.FC<Props> = ({ navigation, route }) => {
       return;
     }
 
-    setLoading(true);
-
+    setLoading(true); //loading state
+       
+    // Search by genre
     try {
       if (searchByGenre) {
         const endpoint = `http://${SERVERIP}:${SERVERPORT}/api/user/search-by-genre/${query}`;
@@ -90,6 +99,7 @@ const SearchScreen: React.FC<Props> = ({ navigation, route }) => {
         const data = await response.json();
         setResults(data);
       } else {
+        // Search by user name
         const response = await fetch(
           `http://${SERVERIP}:${SERVERPORT}/api/user/username/${query}`
         );
@@ -102,7 +112,7 @@ const SearchScreen: React.FC<Props> = ({ navigation, route }) => {
         }
 
         const data = await response.json();
-        setResults([data]);
+        setResults([data]); // Update state with search results
       }
     } catch (error) {
       handleError(error, "Search");
@@ -111,6 +121,7 @@ const SearchScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  //UI and styling 
   return (
     <View style={styles.container}>
       {/* Search Bar */}
